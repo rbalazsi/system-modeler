@@ -1,0 +1,32 @@
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    compileJava {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    repositories {
+        mavenCentral()
+
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
+    ext.versions = [
+            junit          : '4.12',
+    ]
+
+    dependencies {
+        testCompile 'junit:junit:' + versions.junit
+    }
+
+    version = '1.0'
+
+    jar {
+        manifest.attributes provider: 'gradle'
+    }
+}
+

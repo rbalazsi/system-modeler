@@ -1,0 +1,6 @@
+rootProject.name = "system-modeler"
+
+include 'app'
+include 'domain'
+include 'exporter'
+
