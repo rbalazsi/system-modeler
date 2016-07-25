@@ -27,10 +27,13 @@ subprojects {
 
     ext.versions = [
             junit          : '4.12',
+            lombok         : '1.16.10'
     ]
 
     dependencies {
         testCompile 'junit:junit:' + versions.junit
+        //TODO: review why compileOnly() doesn't work
+        compile 'org.projectlombok:lombok:' + versions.lombok
     }
 
     version = '1.0'
