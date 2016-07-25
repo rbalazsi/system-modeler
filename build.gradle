@@ -8,76 +8,99 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
-}
+    compileJava {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
-dependencies{
-    // this dependency is only required when using UserJvmOptionsService
-    // compile files("${System.properties['java.home']}/../lib/packager.jar")
-}
+    repositories {
+        mavenCentral()
 
-apply plugin: 'javafx-gradle-plugin'
+        flatDir {
+            dirs 'libs'
+        }
+    }
 
-// configure javafx-gradle-plugin
-jfx {
-    verbose = true
-    mainClass = "com.something.cool.MainApp"
-    jfxAppOutputDir = "build/jfx/app"
-    jfxMainAppJarName = "project-jfx.jar"
-    deployDir = "src/main/deploy"
-
-    // gradle jfxJar
-    css2bin = false
-    preLoader = null
-    updateExistingJar = false
-    allPermissions = false
-    manifestAttributes = null // Map<String, String>
-    addPackagerJar = true
-
-    // gradle jfxNative
-    identifier = null // setting this for windows-bundlers makes it possible to generate upgradeable installers (using same GUID)
-    vendor = "some serious business corp."
-    nativeOutputDir = "build/jfx/native"
-    bundler = "ALL" // set this to some specific, if your don't want all bundlers running, examples "windows.app", "jnlp", ...
-    jvmProperties = null // Map<String, String>
-    jvmArgs = null // List<String>
-    userJvmArgs = null // Map<String, String>
-    launcherArguments = null // List<String>
-    nativeReleaseVersion = "1.0"
-    needShortcut = false
-    needMenu = false
-    bundleArguments = [
-        // dont bundle JRE (not recommended, but increases build-size/-speed)
-        runtime: null
+    ext.versions = [
+            junit          : '4.12',
     ]
-    appName = "project" // this is used for files below "src/main/deploy", e.g. "src/main/deploy/windows/project.ico"
-    additionalAppResources = null // path to some additional resources when creating application-bundle
-    secondaryLaunchers = [[appName:"somethingDifferent"], [appName:"somethingDifferent2"]]
-    fileAssociations = null // List<Map<String, Object>>
-    noBlobSigning = false // when using bundler "jnlp", you can choose to NOT use blob signing
-    customBundlers // List<String>
-    skipNativeLauncherWorkaround205 = false
 
-    skipNativeLauncherWorkaround124 = false
-    skipNativeLauncherWorkaround167 = false
-    skipJNLPRessourcePathWorkaround182 = false
-    skipSigningJarFilesJNLP185 = false
-    skipSizeRecalculationForJNLP185 = false
+    dependencies {
+        testCompile 'junit:junit:' + versions.junit
+    }
 
-    // gradle jfxGenerateKeyStore
-    keyStore = "src/main/deploy/keystore.jks"
-    keyStoreAlias = "myalias"
-    keyStorePassword = "password"
-    keyPassword = null // will default to keyStorePassword
-    keyStoreType = "jks"
-    overwriteKeyStore = false
+    version = '1.0'
 
-    certDomain = null // required
-    certOrgUnit = null // defaults to "none"
-    certOrg = null // required
-    certState = null // required
-    certCountry = null // required
+    jar {
+        manifest.attributes provider: 'gradle'
+    }
+}
+
+project('app') {
+    apply plugin: 'javafx-gradle-plugin'
+
+    // configure javafx-gradle-plugin
+    jfx {
+        verbose = true
+        mainClass = "com.robertbalazsi.systemmodeler.SystemModelerApp"
+        jfxAppOutputDir = "build/jfx/app"
+        jfxMainAppJarName = "system-modeler.jar"
+        deployDir = "src/main/deploy"
+
+        // gradle jfxJar
+        css2bin = false
+        preLoader = null
+        updateExistingJar = false
+        allPermissions = false
+        manifestAttributes = null // Map<String, String>
+        addPackagerJar = true
+
+        // gradle jfxNative
+        identifier = null // setting this for windows-bundlers makes it possible to generate upgradeable installers (using same GUID)
+        vendor = "robertbalazsi.com"
+        nativeOutputDir = "build/jfx/native"
+        bundler = "ALL" // set this to some specific, if your don't want all bundlers running, examples "windows.app", "jnlp", ...
+        jvmProperties = null // Map<String, String>
+        jvmArgs = null // List<String>
+        userJvmArgs = null // Map<String, String>
+        launcherArguments = null // List<String>
+        nativeReleaseVersion = "1.0"
+        needShortcut = false
+        needMenu = false
+        bundleArguments = [
+                // dont bundle JRE (not recommended, but increases build-size/-speed)
+                runtime: null
+        ]
+        appName = "system-modeler" // this is used for files below "src/main/deploy", e.g. "src/main/deploy/windows/project.ico"
+        additionalAppResources = null // path to some additional resources when creating application-bundle
+        secondaryLaunchers = null // [[appName:"somethingDifferent"], [appName:"somethingDifferent2"]]
+        fileAssociations = null // List<Map<String, Object>>
+        noBlobSigning = false // when using bundler "jnlp", you can choose to NOT use blob signing
+        customBundlers // List<String>
+        skipNativeLauncherWorkaround205 = false
+
+        skipNativeLauncherWorkaround124 = false
+        skipNativeLauncherWorkaround167 = false
+        skipJNLPRessourcePathWorkaround182 = false
+        skipSigningJarFilesJNLP185 = false
+        skipSizeRecalculationForJNLP185 = false
+
+        // gradle jfxGenerateKeyStore
+        keyStore = "src/main/deploy/keystore.jks"
+        keyStoreAlias = "myalias"
+        keyStorePassword = "password"
+        keyPassword = null // will default to keyStorePassword
+        keyStoreType = "jks"
+        overwriteKeyStore = false
+
+        certDomain = null // required
+        certOrgUnit = null // defaults to "none"
+        certOrg = null // required
+        certState = null // required
+        certCountry = null // required
+    }
 }
