@@ -1,0 +1,8 @@
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.TitledPane?>
+<fx:root type="javafx.scene.control.TitledPane" animated="false" collapsible="false" text="%view.palette"
+         xmlns:fx="http://javafx.com/fxml">
+    <content>
+        <Accordion fx:id="itemsAccordion" />
+    </content>
+</fx:root>
