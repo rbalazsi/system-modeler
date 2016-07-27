@@ -4,10 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Accordion;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
-import javafx.util.Callback;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -30,18 +28,6 @@ public class PaletteView extends TitledPane {
         refreshItemsAccordion();
     }
 
-    private void refreshItemsAccordion() {
-        itemsAccordion.getPanes().clear();
-
-        for (PaletteItemCategory category : items) {
-            ListView<PaletteItem> itemsList = new ListView<>();
-            itemsList.setCellFactory(new PaletteItemCellFactory());
-            itemsList.setItems(FXCollections.observableList(category.getItems()));
-            TitledPane categoryPane = new TitledPane(category.getName(), itemsList);
-            itemsAccordion.getPanes().add(categoryPane);
-        }
-    }
-
     public PaletteView() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/paletteView.fxml"));
         loader.setResources(ResourceBundle.getBundle("bundles.main"));
@@ -52,6 +38,17 @@ public class PaletteView extends TitledPane {
             loader.load();
         } catch (IOException exception) {
             throw new RuntimeException(exception);
+        }
+    }
+
+    private void refreshItemsAccordion() {
+        itemsAccordion.getPanes().clear();
+
+        for (PaletteItemCategory category : items) {
+            ListView<String> itemsList = new ListView<>();
+            itemsList.setItems(FXCollections.observableList(category.getItems()));
+            TitledPane categoryPane = new TitledPane(category.getName(), itemsList);
+            itemsAccordion.getPanes().add(categoryPane);
         }
     }
 }

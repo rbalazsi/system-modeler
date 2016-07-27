@@ -22,6 +22,7 @@ public class SystemModelerApp extends Application {
         Parent rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
 
         Scene scene = new Scene(rootNode, 900, 600);
+        scene.getStylesheets().add("/styles/main.css");
 
         stage.setTitle("System Modeler");
         stage.setScene(scene);

@@ -17,7 +17,7 @@ public class PaletteItemCategory {
 
     @Getter
     @Setter
-    private List<PaletteItem> items = Lists.newArrayList();
+    private List<String> items = Lists.newArrayList();
 
     public PaletteItemCategory(String name) {
         this.name = name;
