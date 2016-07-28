@@ -15,19 +15,13 @@ public class PaletteItemRegistry {
     public static final String RECTANGLE = "Rectangle";
     public static final String CIRCLE = "Circle";
 
-    private static Map<String, Shape> itemsMap = Maps.newHashMap();
-
-    // Builtin items
-    static {
-        itemsMap.put(RECTANGLE, new Rectangle(80.0, 30.0));
-        itemsMap.put(CIRCLE, new Circle(15.0));
-    }
-
     public static Shape getItem(String name) {
-        return itemsMap.get(name);
-    }
-
-    public static void putItem(String name, Shape shape) {
-        itemsMap.put(name, shape);
+        //TODO: make it polymorphic
+        if (RECTANGLE.equals(name)) {
+            return new Rectangle(80.0, 30.0);
+        } else if (CIRCLE.equals(name)) {
+            return new Circle(15.0);
+        }
+        throw new IllegalArgumentException(String.format("Shape '%s' not found in the registry.", name));
     }
 }

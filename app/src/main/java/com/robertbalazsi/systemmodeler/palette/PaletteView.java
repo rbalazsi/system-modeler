@@ -46,6 +46,7 @@ public class PaletteView extends TitledPane {
 
         for (PaletteItemCategory category : items) {
             ListView<String> itemsList = new ListView<>();
+            itemsList.setCellFactory(new PaletteListCellFactory());
             itemsList.setItems(FXCollections.observableList(category.getItems()));
             TitledPane categoryPane = new TitledPane(category.getName(), itemsList);
             itemsAccordion.getPanes().add(categoryPane);
