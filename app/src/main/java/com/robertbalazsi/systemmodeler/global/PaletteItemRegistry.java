@@ -1,4 +1,4 @@
-package com.robertbalazsi.systemmodeler.palette;
+package com.robertbalazsi.systemmodeler.global;
 
 import com.google.common.collect.Maps;
 import javafx.scene.shape.Circle;
@@ -18,9 +18,9 @@ public class PaletteItemRegistry {
     public static Shape getItem(String name) {
         //TODO: make it polymorphic
         if (RECTANGLE.equals(name)) {
-            return new Rectangle(80.0, 30.0);
+            return new Rectangle(100.0, 50.0);
         } else if (CIRCLE.equals(name)) {
-            return new Circle(15.0);
+            return new Circle(30.0);
         }
         throw new IllegalArgumentException(String.format("Shape '%s' not found in the registry.", name));
     }

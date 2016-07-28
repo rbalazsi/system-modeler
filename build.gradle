@@ -29,6 +29,7 @@ subprojects {
             junit          : '4.12',
             lombok         : '1.16.10',
             guava          : '19.0',
+            commons_lang3  : '3.0',
     ]
 
     dependencies {
@@ -36,6 +37,7 @@ subprojects {
         //TODO: review why compileOnly() doesn't work
         compile 'org.projectlombok:lombok:' + versions.lombok
         compile 'com.google.guava:guava:' + versions.guava
+        compile 'org.apache.commons:commons-lang3:' + versions.commons_lang3
     }
 
     version = '1.0'
@@ -47,6 +49,10 @@ subprojects {
 
 project('app') {
     apply plugin: 'javafx-gradle-plugin'
+
+    dependencies {
+        compile project(':domain')
+    }
 
     // configure javafx-gradle-plugin
     jfx {

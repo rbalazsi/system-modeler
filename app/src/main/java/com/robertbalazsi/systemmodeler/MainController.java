@@ -2,12 +2,10 @@ package com.robertbalazsi.systemmodeler;
 
 import com.google.common.collect.Lists;
 import com.robertbalazsi.systemmodeler.palette.PaletteItemCategory;
-import com.robertbalazsi.systemmodeler.palette.PaletteItemRegistry;
+import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import com.robertbalazsi.systemmodeler.palette.PaletteView;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
 import java.util.List;
