@@ -31,32 +31,39 @@ public class BoundedBox extends Group {
         // Drawing lines instead of rectangle so that mouse clicked event of the wrapped canvas object won't be hijacked
         // by its bounded box
         List<Line> mainRectLines = Arrays.asList(
-                new Line(x, y, x+width, y),
-                new Line(x+width, y, x+width, y+height),
-                new Line(x+width, y+height, x, y+height),
-                new Line(x, y+height, x, y)
+                new Line(x, y, x + width, y),
+                new Line(x + width, y, x + width, y + height),
+                new Line(x + width, y + height, x, y + height),
+                new Line(x, y + height, x, y)
         );
         mainRectLines.forEach(line -> line.setStroke(Color.BLUE));
 
-        Rectangle rectTopLeft = new Rectangle(x-CTRL_POINT_SIZE/2, y-CTRL_POINT_SIZE/2, CTRL_POINT_SIZE, CTRL_POINT_SIZE);
-        rectTopLeft.setStroke(Color.BLUE);
-
-        Rectangle rectTopRight = new Rectangle(x+width-CTRL_POINT_SIZE/2, y-CTRL_POINT_SIZE/2, CTRL_POINT_SIZE, CTRL_POINT_SIZE);
-        rectTopRight.setStroke(Color.BLUE);
-
-        Rectangle rectBottomLeft = new Rectangle(x-CTRL_POINT_SIZE/2, y+height-CTRL_POINT_SIZE/2, CTRL_POINT_SIZE, CTRL_POINT_SIZE);
-        rectBottomLeft.setStroke(Color.BLUE);
-
-        Rectangle rectBottomRight = new Rectangle(x+width-CTRL_POINT_SIZE/2, y+height-CTRL_POINT_SIZE/2, CTRL_POINT_SIZE, CTRL_POINT_SIZE);
-        rectBottomRight.setStroke(Color.BLUE);
-
         this.getChildren().addAll(mainRectLines);
-        this.getChildren().addAll(rectTopLeft, rectTopRight, rectBottomLeft, rectBottomRight);
+        this.getChildren().addAll(
+                setupControlPoint(x - CTRL_POINT_SIZE / 2, y - CTRL_POINT_SIZE / 2, CTRL_POINT_SIZE, CTRL_POINT_SIZE),
+                setupControlPoint(x + width - CTRL_POINT_SIZE / 2, y - CTRL_POINT_SIZE / 2, CTRL_POINT_SIZE, CTRL_POINT_SIZE),
+                setupControlPoint(x - CTRL_POINT_SIZE / 2, y + height - CTRL_POINT_SIZE / 2, CTRL_POINT_SIZE, CTRL_POINT_SIZE),
+                setupControlPoint(x + width - CTRL_POINT_SIZE / 2, y + height - CTRL_POINT_SIZE / 2, CTRL_POINT_SIZE, CTRL_POINT_SIZE)
+        );
+    }
 
-        this.setOnMouseClicked(event -> {
-            // TODO: handler for control points
-            System.out.println("Bounded box clicked");
+    private static Rectangle setupControlPoint(double x, double y, double width, double height) {
+        Rectangle controlPoint = new Rectangle(x, y, width, height);
+        controlPoint.setFill(Color.BLUE);
+        controlPoint.setStroke(Color.BLUE);
+
+        controlPoint.setOnMouseEntered(event -> {
+            controlPoint.setFill(Color.ORANGE);
+            controlPoint.setStroke(Color.ORANGE);
         });
+        controlPoint.setOnMouseExited(event -> {
+            controlPoint.setFill(Color.BLUE);
+            controlPoint.setStroke(Color.BLUE);
+        });
+
+        // TODO: handler for control points (introduce orientation flag, all the 4 points will handle the event differently)
+
+        return controlPoint;
     }
 
     @Override

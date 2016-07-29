@@ -74,7 +74,7 @@
     </left>
 
    <center>
-      <ObjectCanvas AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER" />
+      <ObjectCanvas fx:id="objectCanvas" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER" />
    </center>
    <right>
       <AnchorPane prefWidth="150.0" BorderPane.alignment="CENTER">
