@@ -1,5 +1,6 @@
 package com.robertbalazsi.systemmodeler.canvas;
 
+import com.google.common.collect.Maps;
 import com.robertbalazsi.systemmodeler.domain.Entity;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
@@ -8,14 +9,19 @@ import javafx.scene.shape.Shape;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Map;
+
 /**
  * Encapsulates an object on the canvas, which includes its shape and its underlying domain object;
  */
 public class CanvasItem extends Group {
 
+    private Map<CanvasItem, ItemOrigTranslate> itemOrigTranslateMap = Maps.newHashMap();
+
     private double initialMouseX, initialMouseY;
     private double origTranslateX, origTranslateY;
     private boolean isMoving = false;
+    private boolean isMultiMove = false;
 
     @Getter
     private final ObjectCanvas parentCanvas;
@@ -43,6 +49,8 @@ public class CanvasItem extends Group {
         visual.setOnMouseClicked(clickedEvent -> {
             if (isMoving) {
                 isMoving = false;
+                isMultiMove = false;
+                itemOrigTranslateMap.clear();
                 clickedEvent.consume();
                 return;
             }
@@ -90,12 +98,22 @@ public class CanvasItem extends Group {
     }
 
     private void applyMover(Node node) {
-        //TODO: implement group move
         node.setOnMousePressed(event -> {
+            isMultiMove = parentCanvas.isSelected(this);
             initialMouseX = event.getSceneX();
             initialMouseY = event.getSceneY();
-            origTranslateX = visual.getTranslateX();
-            origTranslateY = visual.getTranslateY();
+
+            // Move current item
+            if (!isMultiMove) {
+                origTranslateX = visual.getTranslateX();
+                origTranslateY = visual.getTranslateY();
+            }
+            // Move all selected items of parent canvas
+            else {
+                for (CanvasItem item : parentCanvas.allSelected()) {
+                    itemOrigTranslateMap.put(item, new ItemOrigTranslate(item.getTranslateX(), item.getTranslateY()));
+                }
+            }
             event.consume();
         });
 
@@ -103,15 +121,43 @@ public class CanvasItem extends Group {
             isMoving = true;
             double offsetX = event.getSceneX() - initialMouseX;
             double offsetY = event.getSceneY() - initialMouseY;
-            double newTranslateX = origTranslateX + offsetX;
-            double newTranslateY = origTranslateY + offsetY;
+            if (!isMultiMove) {
+                double newTranslateX = origTranslateX + offsetX;
+                double newTranslateY = origTranslateY + offsetY;
 
-            visual.setTranslateX(newTranslateX);
-            visual.setTranslateY(newTranslateY);
+                visual.setTranslateX(newTranslateX);
+                visual.setTranslateY(newTranslateY);
 
-            boundedBox.setTranslateX(newTranslateX);
-            boundedBox.setTranslateY(newTranslateY);
+                boundedBox.setTranslateX(newTranslateX);
+                boundedBox.setTranslateY(newTranslateY);
+            } else {
+                for (Map.Entry<CanvasItem, ItemOrigTranslate> entry : itemOrigTranslateMap.entrySet()) {
+                    CanvasItem item = entry.getKey();
+                    ItemOrigTranslate itemTranslate = entry.getValue();
+
+                    double newTranslateX = itemTranslate.origTranslateX + offsetX;
+                    double newTranslateY = itemTranslate.origTranslateY + offsetY;
+
+                    Shape visual = item.getVisual();
+                    visual.setTranslateX(newTranslateX);
+                    visual.setTranslateY(newTranslateY);
+
+                    BoundedBox boundedBox = item.getBoundedBox();
+                    boundedBox.setTranslateX(newTranslateX);
+                    boundedBox.setTranslateY(newTranslateY);
+                }
+            }
             event.consume();
         });
+    }
+
+    private static class ItemOrigTranslate {
+        double origTranslateX;
+        double origTranslateY;
+
+        public ItemOrigTranslate(double origTranslateX, double origTranslateY) {
+            this.origTranslateX = origTranslateX;
+            this.origTranslateY = origTranslateY;
+        }
     }
 }

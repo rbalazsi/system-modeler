@@ -45,11 +45,6 @@ public class ObjectCanvas extends Pane {
         setupRubberBandSelection();
 
         this.setOnMouseClicked(event -> {
-//            if (rubberBandSelect) {
-//                rubberBandSelect = false;
-//                event.consume();
-//                return;
-//            }
             // We clean the selection if the mouse pointer wasn't in any of the items' bounds.
             if (!mousePointerInAnyCanvasItem(event.getX(), event.getY())) {
                 clearSelection();
@@ -70,6 +65,10 @@ public class ObjectCanvas extends Pane {
 
     public boolean isSelected(CanvasItem item) {
         return selection.contains(item);
+    }
+
+    public Set<CanvasItem> allSelected() {
+        return selection;
     }
 
     public void clearSelection() {
