@@ -63,7 +63,6 @@ public class CanvasItem extends Group {
                 if (!parentCanvas.isSelected(this)) {
                     parentCanvas.select(this);
                 }
-                //TODO: property page update
             }
             clickedEvent.consume();
         });
@@ -111,7 +110,7 @@ public class CanvasItem extends Group {
             // Move all selected items of parent canvas
             else {
                 for (CanvasItem item : parentCanvas.allSelected()) {
-                    itemOrigTranslateMap.put(item, new ItemOrigTranslate(item.getTranslateX(), item.getTranslateY()));
+                    itemOrigTranslateMap.put(item, new ItemOrigTranslate(item.getVisual().getTranslateX(), item.getVisual().getTranslateY()));
                 }
             }
             event.consume();

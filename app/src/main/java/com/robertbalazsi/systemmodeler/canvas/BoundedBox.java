@@ -1,8 +1,6 @@
 package com.robertbalazsi.systemmodeler.canvas;
 
-import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -55,12 +53,9 @@ public class BoundedBox extends Group {
         this.getChildren().addAll(mainRectLines);
         this.getChildren().addAll(rectTopLeft, rectTopRight, rectBottomLeft, rectBottomRight);
 
-        this.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                // TODO: handler for control points
-                System.out.println("Bounded box clicked");
-            }
+        this.setOnMouseClicked(event -> {
+            // TODO: handler for control points
+            System.out.println("Bounded box clicked");
         });
     }
 

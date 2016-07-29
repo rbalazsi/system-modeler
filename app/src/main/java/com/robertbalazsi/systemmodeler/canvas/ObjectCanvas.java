@@ -108,7 +108,6 @@ public class ObjectCanvas extends Pane {
                 if (paletteItem != null) {
                     paletteItem.relocate(event.getX(), event.getY());
 
-                    //TODO: decide on the domain object (use explicit objects for components and sub-systems)
                     getChildren().add(new CanvasItem(this, paletteItem, null));
                     success = true;
                 }
