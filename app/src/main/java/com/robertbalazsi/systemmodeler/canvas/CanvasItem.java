@@ -2,6 +2,7 @@ package com.robertbalazsi.systemmodeler.canvas;
 
 import com.robertbalazsi.systemmodeler.domain.Entity;
 import javafx.geometry.Bounds;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.shape.Shape;
 import lombok.Getter;
@@ -10,7 +11,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * Encapsulates an object on the canvas, which includes its shape and its underlying domain object;
  */
-public class CanvasItem {
+public class CanvasItem extends Group {
+
+    private double initialMouseX, initialMouseY;
+    private double origTranslateX, origTranslateY;
+    private boolean isMoving = false;
+
+    @Getter
+    private final ObjectCanvas parentCanvas;
 
     @Getter
     private final Shape visual;
@@ -21,17 +29,47 @@ public class CanvasItem {
     @Getter
     private final BoundedBox boundedBox;
 
-    public CanvasItem(final Shape visual, final Entity domain) {
+    public CanvasItem(final ObjectCanvas parentCanvas, final Shape visual, final Entity domain) {
+        this.parentCanvas = parentCanvas;
         this.visual = visual;
         this.domain = domain;
 
         Bounds bounds = visual.getBoundsInParent();
         boundedBox = new BoundedBox(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
+        boundedBox.setVisible(false);
 
         applyMover(visual);
 
-        //TODO: fix it
-//        applyMover(boundedBox);
+        visual.setOnMouseClicked(clickedEvent -> {
+            if (isMoving) {
+                isMoving = false;
+                clickedEvent.consume();
+                return;
+            }
+            if (!clickedEvent.isShiftDown() && !clickedEvent.isControlDown()) {
+                parentCanvas.clearSelection();
+            }
+            if (clickedEvent.isControlDown() && parentCanvas.isSelected(this)) {
+                parentCanvas.deselect(this);
+            } else {
+                if (!parentCanvas.isSelected(this)) {
+                    parentCanvas.select(this);
+                }
+                //TODO: property page update
+            }
+            clickedEvent.consume();
+        });
+
+        getChildren().add(visual);
+        getChildren().add(boundedBox);
+    }
+
+    public void showBoundedBox() {
+        boundedBox.setVisible(true);
+    }
+
+    public void hideBoundedBox() {
+        boundedBox.setVisible(false);
     }
 
     @Override
@@ -51,12 +89,29 @@ public class CanvasItem {
         return new HashCodeBuilder().append(visual).hashCode();
     }
 
-    private static void applyMover(Node node) {
-        Bounds initialBounds = node.getBoundsInParent();
+    private void applyMover(Node node) {
+        //TODO: implement group move
+        node.setOnMousePressed(event -> {
+            initialMouseX = event.getSceneX();
+            initialMouseY = event.getSceneY();
+            origTranslateX = visual.getTranslateX();
+            origTranslateY = visual.getTranslateY();
+            event.consume();
+        });
 
         node.setOnMouseDragged(event -> {
-            node.setTranslateX(event.getSceneX() - initialBounds.getMinX());
-            node.setTranslateY(event.getSceneY() - initialBounds.getMinY());
+            isMoving = true;
+            double offsetX = event.getSceneX() - initialMouseX;
+            double offsetY = event.getSceneY() - initialMouseY;
+            double newTranslateX = origTranslateX + offsetX;
+            double newTranslateY = origTranslateY + offsetY;
+
+            visual.setTranslateX(newTranslateX);
+            visual.setTranslateY(newTranslateY);
+
+            boundedBox.setTranslateX(newTranslateX);
+            boundedBox.setTranslateY(newTranslateY);
+            event.consume();
         });
     }
 }
