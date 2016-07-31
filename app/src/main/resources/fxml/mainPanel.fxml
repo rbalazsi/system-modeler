@@ -13,8 +13,8 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import com.robertbalazsi.systemmodeler.palette.PaletteView?>
-<?import com.robertbalazsi.systemmodeler.canvas.ObjectCanvas?>
-<BorderPane fx:id="mainPane" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.robertbalazsi.systemmodeler.MainController">
+<?import com.robertbalazsi.systemmodeler.diagram.Diagram?>
+<BorderPane fx:id="mainPane" prefWidth="1024.0" prefHeight="768.0"  xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.robertbalazsi.systemmodeler.MainController">
 
 
     <top>
@@ -61,9 +61,9 @@
     </top>
 
     <left>
-        <AnchorPane prefWidth="150.0" BorderPane.alignment="CENTER">
+        <AnchorPane BorderPane.alignment="CENTER">
             <children>
-                <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                         <PaletteView fx:id="paletteView" />
                         <TitledPane animated="false" text="Structure" />
@@ -74,7 +74,7 @@
     </left>
 
    <center>
-      <ObjectCanvas fx:id="objectCanvas" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER" />
+      <Diagram fx:id="diagram" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER" />
    </center>
    <right>
       <AnchorPane prefWidth="150.0" BorderPane.alignment="CENTER">

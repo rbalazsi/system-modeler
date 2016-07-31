@@ -21,7 +21,7 @@ public class SystemModelerApp extends Application {
         FXMLLoader loader = new FXMLLoader();
         Parent rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
 
-        Scene scene = new Scene(rootNode, 900, 600);
+        Scene scene = new Scene(rootNode, 1024, 768);
         scene.getStylesheets().add("/styles/main.css");
 
         stage.setTitle("System Modeler");

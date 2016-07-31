@@ -1,6 +1,6 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="javafx.scene.control.TitledPane" animated="false" collapsible="false" text="%view.palette"
+<fx:root type="javafx.scene.control.TitledPane" animated="false" text="%view.palette"
          xmlns:fx="http://javafx.com/fxml">
     <content>
         <VBox fx:id="itemsBox" />

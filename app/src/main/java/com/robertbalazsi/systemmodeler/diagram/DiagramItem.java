@@ -1,4 +1,4 @@
-package com.robertbalazsi.systemmodeler.canvas;
+package com.robertbalazsi.systemmodeler.diagram;
 
 import com.google.common.collect.Maps;
 import com.robertbalazsi.systemmodeler.domain.Entity;
@@ -12,11 +12,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import java.util.Map;
 
 /**
- * Encapsulates an object on the canvas, which includes its shape and its underlying domain object;
+ * Encapsulates an object on the diagram, which includes its shape and its underlying domain object;
  */
-public class CanvasItem extends AnchorPane {
+public class DiagramItem extends AnchorPane {
 
-    private Map<CanvasItem, ItemOrigTranslate> itemOrigTranslateMap = Maps.newHashMap();
+    private Map<DiagramItem, ItemOrigTranslate> itemOrigTranslateMap = Maps.newHashMap();
 
     private double initialMouseX, initialMouseY;
     private double origTranslateX, origTranslateY;
@@ -24,7 +24,7 @@ public class CanvasItem extends AnchorPane {
     private boolean isMultiMove = false;
 
     @Getter
-    private final ObjectCanvas parentCanvas;
+    private final Diagram parentCanvas;
 
     @Getter
     private final Shape visual;
@@ -32,7 +32,7 @@ public class CanvasItem extends AnchorPane {
     @Getter
     private final Entity domain;
 
-    public CanvasItem(final ObjectCanvas parentCanvas, final Shape visual, final Entity domain) {
+    public DiagramItem(final Diagram parentCanvas, final Shape visual, final Entity domain) {
         this.parentCanvas = parentCanvas;
         this.visual = visual;
         this.domain = domain;
@@ -82,9 +82,9 @@ public class CanvasItem extends AnchorPane {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        CanvasItem rhs = (CanvasItem) o;
+        DiagramItem rhs = (DiagramItem) o;
 
-        // There is no need to consider the domain entity as no two different canvas item shapes can share the same domain
+        // There is no need to consider the domain entity as no two different diagram item shapes can share the same domain
         // object. The bounded box is also not taken into account.
         return this.equals(rhs);
     }
@@ -105,9 +105,9 @@ public class CanvasItem extends AnchorPane {
                 origTranslateX = getTranslateX();
                 origTranslateY = getTranslateY();
             }
-            // Move all selected items of parent canvas
+            // Move all selected items of parent diagram
             else {
-                for (CanvasItem item : parentCanvas.allSelected()) {
+                for (DiagramItem item : parentCanvas.allSelected()) {
                     itemOrigTranslateMap.put(item, new ItemOrigTranslate(item.getTranslateX(), item.getTranslateY()));
                 }
             }
@@ -126,8 +126,8 @@ public class CanvasItem extends AnchorPane {
                 setTranslateX(newTranslateX);
                 setTranslateY(newTranslateY);
             } else {
-                for (Map.Entry<CanvasItem, ItemOrigTranslate> entry : itemOrigTranslateMap.entrySet()) {
-                    CanvasItem item = entry.getKey();
+                for (Map.Entry<DiagramItem, ItemOrigTranslate> entry : itemOrigTranslateMap.entrySet()) {
+                    DiagramItem item = entry.getKey();
                     ItemOrigTranslate itemTranslate = entry.getValue();
 
                     double newTranslateX = itemTranslate.origTranslateX + offsetX;

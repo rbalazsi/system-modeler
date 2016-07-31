@@ -1,16 +1,17 @@
 package com.robertbalazsi.systemmodeler.palette;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 /**
  * The palette view. It contains multiple item categories, each with its items.
@@ -25,7 +26,7 @@ public class PaletteView extends TitledPane {
 
     public void setItems(List<PaletteItemCategory> items) {
         this.items = items;
-        refreshItemsAccordion();
+        refreshItems();
     }
 
     public PaletteView() {
@@ -41,15 +42,20 @@ public class PaletteView extends TitledPane {
         }
     }
 
-    private void refreshItemsAccordion() {
+    private void refreshItems() {
         itemsBox.getChildren().clear();
 
+        TreeItem<PaletteItem> rootItem = new TreeItem<>(new PaletteItem("All Items", PaletteItem.ItemType.CATEGORY));
+        rootItem.setExpanded(true);
         for (PaletteItemCategory category : items) {
-            ListView<String> itemsList = new ListView<>();
-            itemsList.setCellFactory(new PaletteListCellFactory());
-            itemsList.setItems(FXCollections.observableList(category.getItems()));
-            TitledPane categoryPane = new TitledPane(category.getName(), itemsList);
-            itemsBox.getChildren().add(categoryPane);
+            TreeItem<PaletteItem> categoryTree = new TreeItem<>(new PaletteItem(category.getName(), PaletteItem.ItemType.CATEGORY));
+            categoryTree.setExpanded(true);
+            categoryTree.getChildren().addAll(category.getItems().stream()
+                    .map(s -> new TreeItem<>(new PaletteItem(s, PaletteItem.ItemType.ITEM))).collect(Collectors.toList()));
+            rootItem.getChildren().add(categoryTree);
         }
+        TreeView<PaletteItem> itemsList = new TreeView<>(rootItem);
+        itemsList.setCellFactory(new PaletteListCellFactory());
+        itemsBox.getChildren().add(itemsList);
     }
 }
