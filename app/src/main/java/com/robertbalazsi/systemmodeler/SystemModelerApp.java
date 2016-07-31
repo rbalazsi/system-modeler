@@ -26,7 +26,7 @@ public class SystemModelerApp extends Application {
 
         stage.setTitle("System Modeler");
         stage.setScene(scene);
-        stage.setMaximized(false);
+        stage.setMaximized(true);
 
         stage.show();
     }
