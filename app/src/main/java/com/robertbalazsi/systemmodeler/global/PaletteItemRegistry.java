@@ -18,9 +18,9 @@ public class PaletteItemRegistry {
     public static Shape getItem(String name) {
         //TODO: make it polymorphic
         if (RECTANGLE.equals(name)) {
-            return new Rectangle(100.0, 50.0);
+            return new Rectangle(150.0, 70.0);
         } else if (CIRCLE.equals(name)) {
-            return new Circle(30.0);
+            return new Circle(60.0);
         }
         throw new IllegalArgumentException(String.format("Shape '%s' not found in the registry.", name));
     }

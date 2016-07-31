@@ -2,9 +2,9 @@ package com.robertbalazsi.systemmodeler.canvas;
 
 import com.google.common.collect.Maps;
 import com.robertbalazsi.systemmodeler.domain.Entity;
-import javafx.geometry.Bounds;
-import javafx.scene.Group;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Shape;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Encapsulates an object on the canvas, which includes its shape and its underlying domain object;
  */
-public class CanvasItem extends Group {
+public class CanvasItem extends AnchorPane {
 
     private Map<CanvasItem, ItemOrigTranslate> itemOrigTranslateMap = Maps.newHashMap();
 
@@ -32,17 +32,10 @@ public class CanvasItem extends Group {
     @Getter
     private final Entity domain;
 
-    @Getter
-    private final BoundedBox boundedBox;
-
     public CanvasItem(final ObjectCanvas parentCanvas, final Shape visual, final Entity domain) {
         this.parentCanvas = parentCanvas;
         this.visual = visual;
         this.domain = domain;
-
-        Bounds bounds = visual.getBoundsInParent();
-        boundedBox = new BoundedBox(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
-        boundedBox.setVisible(false);
 
         applyMover(visual);
 
@@ -68,15 +61,20 @@ public class CanvasItem extends Group {
         });
 
         getChildren().add(visual);
-        getChildren().add(boundedBox);
+
+        deselect();
+        AnchorPane.setBottomAnchor(visual, 1.0);
+        AnchorPane.setRightAnchor(visual, 1.0);
+        AnchorPane.setTopAnchor(visual, 1.0);
+        AnchorPane.setLeftAnchor(visual, 1.0);
     }
 
-    public void showBoundedBox() {
-        boundedBox.setVisible(true);
+    void select() {
+        this.setStyle("-fx-border-style: dashed; -fx-border-color: blue");
     }
 
-    public void hideBoundedBox() {
-        boundedBox.setVisible(false);
+    void deselect() {
+        this.setStyle("-fx-border-color: transparent");
     }
 
     @Override
@@ -104,13 +102,13 @@ public class CanvasItem extends Group {
 
             // Move current item
             if (!isMultiMove) {
-                origTranslateX = visual.getTranslateX();
-                origTranslateY = visual.getTranslateY();
+                origTranslateX = getTranslateX();
+                origTranslateY = getTranslateY();
             }
             // Move all selected items of parent canvas
             else {
                 for (CanvasItem item : parentCanvas.allSelected()) {
-                    itemOrigTranslateMap.put(item, new ItemOrigTranslate(item.getVisual().getTranslateX(), item.getVisual().getTranslateY()));
+                    itemOrigTranslateMap.put(item, new ItemOrigTranslate(item.getTranslateX(), item.getTranslateY()));
                 }
             }
             event.consume();
@@ -118,17 +116,15 @@ public class CanvasItem extends Group {
 
         node.setOnMouseDragged(event -> {
             isMoving = true;
+            setCursor(Cursor.MOVE);
             double offsetX = event.getSceneX() - initialMouseX;
             double offsetY = event.getSceneY() - initialMouseY;
             if (!isMultiMove) {
                 double newTranslateX = origTranslateX + offsetX;
                 double newTranslateY = origTranslateY + offsetY;
 
-                visual.setTranslateX(newTranslateX);
-                visual.setTranslateY(newTranslateY);
-
-                boundedBox.setTranslateX(newTranslateX);
-                boundedBox.setTranslateY(newTranslateY);
+                setTranslateX(newTranslateX);
+                setTranslateY(newTranslateY);
             } else {
                 for (Map.Entry<CanvasItem, ItemOrigTranslate> entry : itemOrigTranslateMap.entrySet()) {
                     CanvasItem item = entry.getKey();
@@ -137,16 +133,14 @@ public class CanvasItem extends Group {
                     double newTranslateX = itemTranslate.origTranslateX + offsetX;
                     double newTranslateY = itemTranslate.origTranslateY + offsetY;
 
-                    Shape visual = item.getVisual();
-                    visual.setTranslateX(newTranslateX);
-                    visual.setTranslateY(newTranslateY);
-
-                    BoundedBox boundedBox = item.getBoundedBox();
-                    boundedBox.setTranslateX(newTranslateX);
-                    boundedBox.setTranslateY(newTranslateY);
+                    item.setTranslateX(newTranslateX);
+                    item.setTranslateY(newTranslateY);
                 }
             }
             event.consume();
+        });
+        node.setOnMouseReleased(event -> {
+            setCursor(Cursor.DEFAULT);
         });
     }
 
@@ -154,7 +148,7 @@ public class CanvasItem extends Group {
         double origTranslateX;
         double origTranslateY;
 
-        public ItemOrigTranslate(double origTranslateX, double origTranslateY) {
+        ItemOrigTranslate(double origTranslateX, double origTranslateY) {
             this.origTranslateX = origTranslateX;
             this.origTranslateY = origTranslateY;
         }

@@ -1,15 +1,15 @@
 package com.robertbalazsi.systemmodeler;
 
 import com.google.common.collect.Lists;
-import com.robertbalazsi.systemmodeler.canvas.CanvasItem;
 import com.robertbalazsi.systemmodeler.canvas.ObjectCanvas;
 import com.robertbalazsi.systemmodeler.palette.PaletteItemCategory;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import com.robertbalazsi.systemmodeler.palette.PaletteView;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
 import java.util.List;
@@ -31,15 +31,10 @@ public class MainController implements Initializable {
         //TODO: load real items
         fillPaletteWithDummyItems(paletteView);
 
-        //TODO: debug - revert
-        Rectangle rect1 = new Rectangle(50, 50, 100, 50);
-        Rectangle rect2 = new Rectangle(200, 250, 80, 40);
-        Circle circle = new Circle(100, 150, 30);
-        objectCanvas.getChildren().addAll(
-                new CanvasItem(objectCanvas, rect1, null),
-                new CanvasItem(objectCanvas, rect2, null),
-                new CanvasItem(objectCanvas, circle, null)
-        );
+        Region region = new Region();
+        region.relocate(200, 250);
+        region.setShape(new Circle(80, Color.BLACK));
+        objectCanvas.getChildren().add(region);
     }
 
     private static void fillPaletteWithDummyItems(PaletteView paletteView) {

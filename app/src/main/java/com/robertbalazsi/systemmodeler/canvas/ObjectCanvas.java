@@ -54,12 +54,12 @@ public class ObjectCanvas extends Pane {
     }
 
     public void select(CanvasItem item) {
-        item.showBoundedBox();
+        item.select();
         selection.add(item);
     }
 
     public void deselect(CanvasItem item) {
-        item.hideBoundedBox();
+        item.deselect();
         selection.remove(item);
     }
 
@@ -72,8 +72,8 @@ public class ObjectCanvas extends Pane {
     }
 
     public void clearSelection() {
-        // Also remove all bounded boxes from the canvas
-        selection.forEach(CanvasItem::hideBoundedBox);
+        // Also hide the borders of the items
+        selection.forEach(CanvasItem::deselect);
         selection.clear();
     }
 
@@ -98,17 +98,16 @@ public class ObjectCanvas extends Pane {
             }
         });
 
-        //TODO: provide visual feedback by implementing onDragEntered() and onDragExited()
-
         this.setOnDragDropped(event -> {
             Dragboard dragboard = event.getDragboard();
             boolean success = false;
             if (dragboard.hasString()) {
                 Shape paletteItem = PaletteItemRegistry.getItem(dragboard.getString());
                 if (paletteItem != null) {
-                    paletteItem.relocate(event.getX(), event.getY());
+                    CanvasItem item = new CanvasItem(this, paletteItem, null);
+                    item.relocate(event.getX(), event.getY());
 
-                    getChildren().add(new CanvasItem(this, paletteItem, null));
+                    getChildren().add(item);
                     success = true;
                 }
             }
@@ -127,7 +126,7 @@ public class ObjectCanvas extends Pane {
             rubberBandRect.setStroke(Color.BLUE);
             rubberBandRect.setStrokeWidth(1);
             rubberBandRect.setStrokeLineCap(StrokeLineCap.ROUND);
-            rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.6));
+            rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.4));
             getChildren().add(rubberBandRect);
 
             event.consume();
