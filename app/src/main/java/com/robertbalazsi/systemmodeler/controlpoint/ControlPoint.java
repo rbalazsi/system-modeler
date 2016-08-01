@@ -1,6 +1,7 @@
 package com.robertbalazsi.systemmodeler.controlpoint;
 
 import com.robertbalazsi.systemmodeler.diagram.CanvasItem;
+import javafx.beans.property.*;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.GraphicsContext;
@@ -17,13 +18,64 @@ public abstract class ControlPoint {
     public static final Color DEFAULT_DESELECTED_COLOR = Color.BLACK;
     public static final Color DEFAULT_SELECTED_COLOR = Color.RED;
 
-    //TODO: review and define some of these as observable properties
+    private BooleanProperty moveConstrained = new SimpleBooleanProperty(this, "moveConstrained", false);
+
+    public final BooleanProperty moveConstrainedProperty() {
+        return moveConstrained;
+    }
+
+    public final boolean isMoveConstrained() {
+        return moveConstrained.get();
+    }
+
+    public final void setMoveConstrained(boolean constrained) {
+        moveConstrained.set(constrained);
+    }
+
+    private DoubleProperty size = new SimpleDoubleProperty(this, "size", DEFAULT_SIZE);
+
+    public final DoubleProperty sizeProperty() {
+        return size;
+    }
+
+    public final double getSize() {
+        return size.get();
+    }
+
+    public final void setSize(double size) {
+        this.size.set(size);
+    }
+
+    private ObjectProperty<Color> selectedColor = new SimpleObjectProperty<>(this, "selectedColor", DEFAULT_SELECTED_COLOR);
+
+    public final ObjectProperty<Color> selectedColorProperty() {
+        return selectedColor;
+    }
+
+    public final Color getSelectedColor() {
+        return selectedColor.get();
+    }
+
+    public final void setSelectedColor(Color color) {
+        selectedColor.set(color);
+    }
+
+    private ObjectProperty<Color> deselectedColor = new SimpleObjectProperty<>(this, "deselectedColor", DEFAULT_DESELECTED_COLOR);
+
+    public final ObjectProperty<Color> deselectedColorProperty() {
+        return deselectedColor;
+    }
+
+    public final Color getDeselectedColor() {
+        return deselectedColor.get();
+    }
+
+    public final void setDeselectedColor(Color color) {
+        deselectedColor.set(color);
+    }
+
     protected CanvasItem parent;
     protected Location location;
-    protected boolean moveConstrained;
-    protected double size;
-    protected Color selectedColor;
-    protected Color deselectedColor;
     protected Bounds bounds;
 
     protected double initMouseX, initMouseY;
@@ -34,10 +86,16 @@ public abstract class ControlPoint {
                            Color deselectedColor) {
         this.parent = parent;
         this.location = location;
-        this.moveConstrained = moveConstrained;
-        this.size = size != 0 ? size : DEFAULT_SIZE;
-        this.deselectedColor = deselectedColor != null ? deselectedColor : DEFAULT_DESELECTED_COLOR;
-        this.selectedColor = selectedColor != null ? selectedColor : DEFAULT_SELECTED_COLOR;
+        setMoveConstrained(moveConstrained);
+        if (size != 0) {
+            setSize(size);
+        }
+        if (deselectedColor != null) {
+            setDeselectedColor(deselectedColor);
+        }
+        if (selectedColor != null) {
+            setSelectedColor(selectedColor);
+        }
         refreshBounds();
     }
 
@@ -50,11 +108,11 @@ public abstract class ControlPoint {
     }
 
     public void select() {
-        draw(selectedColor);
+        draw(getSelectedColor());
     }
 
     public void deselect() {
-        draw(deselectedColor);
+        draw(getDeselectedColor());
     }
 
     public void clear() {
@@ -130,7 +188,7 @@ public abstract class ControlPoint {
     }
 
     /**
-     * Hidden class for deciding the control point type with respect to its location.
+     * Hidden factory class for deciding the {@link ControlPoint} implementation with respect to its location.
      */
     private static class Factory {
         static ControlPoint create(Builder builder) {
@@ -142,13 +200,13 @@ public abstract class ControlPoint {
                 case TOP_RIGHT:
                     return new TopRight(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
                 case MIDDLE_LEFT:
-                    return new MiddleLeft(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
+                    return new MiddleLeft(builder.parent, builder.size, builder.selectedColor, builder.deselectedColor);
                 case MIDDLE_RIGHT:
-                    return new MiddleRight(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
+                    return new MiddleRight(builder.parent, builder.size, builder.selectedColor, builder.deselectedColor);
                 case BOTTOM_LEFT:
                     return new BottomLeft(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
                 case BOTTOM_CENTER:
-                    return new BottomCenter(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
+                    return new BottomCenter(builder.parent, builder.size, builder.selectedColor, builder.deselectedColor);
                 case BOTTOM_RIGHT:
                     return new BottomRight(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
                 default:
@@ -171,7 +229,7 @@ public abstract class ControlPoint {
             parent.setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
             parent.setWidth(initWidth + initMouseX - event.getSceneX());
 
-            if (!moveConstrained) {
+            if (!isMoveConstrained()) {
                 parent.setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
                 parent.setHeight(initHeight + initMouseY - event.getSceneY());
             } else {
@@ -182,7 +240,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(0, 0, size, size);
+            return new BoundingBox(0, 0, getSize(), getSize());
         }
     }
 
@@ -203,7 +261,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth() / 2 - size /2, 0, size, size);
+            return new BoundingBox(parent.getWidth() / 2 - getSize() /2, 0, getSize(), getSize());
         }
     }
 
@@ -220,7 +278,7 @@ public abstract class ControlPoint {
         public void receiveMouseDragged(MouseEvent event) {
             parent.setWidth(initWidth + event.getSceneX() - initMouseX);
 
-            if (!moveConstrained) {
+            if (!isMoveConstrained()) {
                 parent.setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
                 parent.setHeight(initHeight + initMouseY - event.getSceneY());
             } else {
@@ -231,7 +289,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth()- size, 0, size, size);
+            return new BoundingBox(parent.getWidth()- getSize(), 0, getSize(), getSize());
         }
     }
 
@@ -240,8 +298,8 @@ public abstract class ControlPoint {
      */
     private static class MiddleLeft extends ControlPoint {
 
-        MiddleLeft(CanvasItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.MIDDLE_LEFT, moveConstrained, size, selectedColor, deselectedColor);
+        MiddleLeft(CanvasItem parent, double size, Color selectedColor, Color deselectedColor) {
+            super(parent, Location.MIDDLE_LEFT, true, size, selectedColor, deselectedColor);
         }
 
         @Override
@@ -252,7 +310,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(1, parent.getHeight() / 2 - size /2, size, size);
+            return new BoundingBox(1, parent.getHeight() / 2 - getSize() /2, getSize(), getSize());
         }
     }
 
@@ -261,8 +319,8 @@ public abstract class ControlPoint {
      */
     private static class MiddleRight extends ControlPoint {
 
-        MiddleRight(CanvasItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.MIDDLE_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
+        MiddleRight(CanvasItem parent, double size, Color selectedColor, Color deselectedColor) {
+            super(parent, Location.MIDDLE_RIGHT, true, size, selectedColor, deselectedColor);
         }
 
         @Override
@@ -272,7 +330,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth()- size, parent.getHeight() / 2 - size /2, size, size);
+            return new BoundingBox(parent.getWidth()- getSize(), parent.getHeight() / 2 - getSize() /2, getSize(), getSize());
         }
     }
 
@@ -289,7 +347,7 @@ public abstract class ControlPoint {
         public void receiveMouseDragged(MouseEvent event) {
             parent.setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
             parent.setWidth(initWidth + initMouseX - event.getSceneX());
-            if (!moveConstrained) {
+            if (!isMoveConstrained()) {
                 parent.setHeight(initHeight + event.getSceneY() - initMouseY);
             } else {
                 parent.setHeight(initHeight + event.getSceneX() - initMouseX);
@@ -298,7 +356,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(0, parent.getHeight()- size, size, size);
+            return new BoundingBox(0, parent.getHeight() - getSize(), getSize(), getSize());
         }
     }
 
@@ -307,8 +365,8 @@ public abstract class ControlPoint {
      */
     private static class BottomCenter extends ControlPoint {
 
-        BottomCenter(CanvasItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.BOTTOM_CENTER, moveConstrained, size, selectedColor, deselectedColor);
+        BottomCenter(CanvasItem parent, double size, Color selectedColor, Color deselectedColor) {
+            super(parent, Location.BOTTOM_CENTER, true, size, selectedColor, deselectedColor);
         }
 
         @Override
@@ -318,7 +376,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth() / 2 - size /2, parent.getHeight()- size, size, size);
+            return new BoundingBox(parent.getWidth() / 2 - getSize() /2, parent.getHeight() - getSize(), getSize(), getSize());
         }
     }
 
@@ -334,7 +392,7 @@ public abstract class ControlPoint {
         @Override
         public void receiveMouseDragged(MouseEvent event) {
             parent.setWidth(initWidth + event.getSceneX() - initMouseX);
-            if (!moveConstrained) {
+            if (!isMoveConstrained()) {
                 parent.setHeight(initHeight + event.getSceneY() - initMouseY);
             } else {
                 parent.setHeight(initHeight + event.getSceneX() - initMouseX);
@@ -343,7 +401,7 @@ public abstract class ControlPoint {
 
         @Override
         public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth()- size, parent.getHeight()- size, size, size);
+            return new BoundingBox(parent.getWidth()- getSize(), parent.getHeight() - getSize(), getSize(), getSize());
         }
     }
 }
