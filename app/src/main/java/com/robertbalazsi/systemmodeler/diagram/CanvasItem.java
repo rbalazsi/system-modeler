@@ -78,6 +78,8 @@ public abstract class CanvasItem extends Canvas {
                     point.refreshBounds();
                 });
 
+                //TODO: constrain move on ctrl pressed
+
                 selectedControlPoint.receiveMouseDragged(event);
                 clear();
                 drawItem();
