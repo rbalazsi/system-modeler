@@ -64,7 +64,7 @@ public abstract class ControlPoint {
     }
 
     public void refreshBounds() {
-        bounds = calculateBounds(parent, location);
+        bounds = calculateBounds();
     }
 
     public void receiveMousePressed(MouseEvent event) {
@@ -85,29 +85,6 @@ public abstract class ControlPoint {
         gc.setFill(color);
         gc.fillRect(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
         gc.save();
-    }
-
-    private static Bounds calculateBounds(CanvasItem parent, Location location) {
-        switch (location) {
-            case TOP_LEFT:
-                return new BoundingBox(0, 0, DEFAULT_SIZE, DEFAULT_SIZE);
-            case TOP_CENTER:
-                return new BoundingBox(parent.getWidth() / 2 - DEFAULT_SIZE /2, 0, DEFAULT_SIZE, DEFAULT_SIZE);
-            case TOP_RIGHT:
-                return new BoundingBox(parent.getWidth()- DEFAULT_SIZE, 0, DEFAULT_SIZE, DEFAULT_SIZE);
-            case MIDDLE_LEFT:
-                return new BoundingBox(1, parent.getHeight() / 2 - DEFAULT_SIZE /2, DEFAULT_SIZE, DEFAULT_SIZE);
-            case MIDDLE_RIGHT:
-                return new BoundingBox(parent.getWidth()- DEFAULT_SIZE, parent.getHeight() / 2 - DEFAULT_SIZE /2, DEFAULT_SIZE, DEFAULT_SIZE);
-            case BOTTOM_LEFT:
-                return new BoundingBox(0, parent.getHeight()- DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
-            case BOTTOM_CENTER:
-                return new BoundingBox(parent.getWidth() / 2 - DEFAULT_SIZE /2, parent.getHeight()- DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
-            case BOTTOM_RIGHT:
-                return new BoundingBox(parent.getWidth()- DEFAULT_SIZE, parent.getHeight()- DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
-            default:
-                return null;
-        }
     }
 
     /**
