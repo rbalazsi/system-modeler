@@ -11,12 +11,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Map;
 
-/**
+/** TODO: DEPRECATED - REMOVE
  * Encapsulates an object on the diagram, which includes its shape and its underlying domain object;
  */
 public class DiagramItem extends AnchorPane {
 
-    private Map<DiagramItem, ItemOrigTranslate> itemOrigTranslateMap = Maps.newHashMap();
+    /*private Map<DiagramItem, ItemOrigTranslate> itemOrigTranslateMap = Maps.newHashMap();
 
     private double initialMouseX, initialMouseY;
     private double origTranslateX, origTranslateY;
@@ -152,5 +152,5 @@ public class DiagramItem extends AnchorPane {
             this.origTranslateX = origTranslateX;
             this.origTranslateY = origTranslateY;
         }
-    }
+    }*/
 }

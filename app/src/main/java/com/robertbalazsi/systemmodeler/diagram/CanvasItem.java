@@ -33,6 +33,7 @@ public abstract class CanvasItem extends Canvas {
                 isMoving = false;
             } else {
                 select();
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.SELECTED, event));
             }
 
             event.consume();
@@ -67,6 +68,9 @@ public abstract class CanvasItem extends Canvas {
 
             if (selectedControlPoint != null) {
                 selectedControlPoint.receiveMousePressed(event);
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZE_STARTED, event));
+            } else {
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVE_STARTED, event));
             }
             event.consume();
         });
@@ -78,7 +82,7 @@ public abstract class CanvasItem extends Canvas {
                     point.refreshBounds();
                 });
 
-                //TODO: constrain move on ctrl pressed
+                //TODO: constrain move on ctrl pressed, but make exceptions to Circle, and other inherently constrained items
 
                 selectedControlPoint.receiveMouseDragged(event);
                 clear();
@@ -87,10 +91,23 @@ public abstract class CanvasItem extends Canvas {
 
                 controlPoints.forEach(ControlPoint::deselect);
                 selectedControlPoint.select();
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZING, event));
             } else {
                 isMoving = true;
-                setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
-                setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVING, event));
+
+//                TODO: diagram should handle this
+//                setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
+//                setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
+            }
+            event.consume();
+        });
+
+        this.setOnMouseReleased(event -> {
+            if (isMoving) {
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVE_FINISHED, event));
+            } else {
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZE_FINISHED, event));
             }
             event.consume();
         });

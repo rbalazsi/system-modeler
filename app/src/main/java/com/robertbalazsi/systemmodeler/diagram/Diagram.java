@@ -9,7 +9,6 @@ import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeLineCap;
 
 import java.io.IOException;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 public class Diagram extends Pane {
 
     //TODO observable collection?
-    private Set<DiagramItem> selection = Sets.newHashSet();
+    private Set<CanvasItem> selection = Sets.newHashSet();
     private boolean rubberBandSelect = false;
     private double rubberBandInitX, rubberBandInitY;
     private Rectangle rubberBandRect;
@@ -43,46 +42,35 @@ public class Diagram extends Pane {
         setupRubberBandSelection();
 
         this.setOnMouseClicked(event -> {
-            //TODO: review/solve the focus problem
-            this.setFocused(true);
             // We clean the selection if the mouse pointer wasn't in any of the items' bounds.
             if (!mousePointerInAnyCanvasItem(event.getX(), event.getY())) {
                 clearSelection();
             }
             event.consume();
         });
-        this.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                if (event.getCode() == KeyCode.DELETE) {
-                    //TODO: implement
-                    System.out.println("Delete pressed");
-                }
-            }
-        });
     }
 
-    public void select(DiagramItem item) {
+    public void select(CanvasItem item) {
         item.select();
         selection.add(item);
     }
 
-    public void deselect(DiagramItem item) {
+    public void deselect(CanvasItem item) {
         item.deselect();
         selection.remove(item);
     }
 
-    public boolean isSelected(DiagramItem item) {
+    public boolean isSelected(CanvasItem item) {
         return selection.contains(item);
     }
 
-    public Set<DiagramItem> allSelected() {
+    public Set<CanvasItem> allSelected() {
         return selection;
     }
 
     public void clearSelection() {
         // Also hide the borders of the items
-        selection.forEach(DiagramItem::deselect);
+        selection.forEach(CanvasItem::deselect);
         selection.clear();
     }
 
@@ -111,9 +99,9 @@ public class Diagram extends Pane {
             Dragboard dragboard = event.getDragboard();
             boolean success = false;
             if (dragboard.hasString()) {
-                Shape paletteItem = PaletteItemRegistry.getItem(dragboard.getString());
-                if (paletteItem != null) {
-                    DiagramItem item = new DiagramItem(this, paletteItem, null);
+                CanvasItem item = PaletteItemRegistry.getItem(dragboard.getString());
+                if (item != null) {
+                    installItemEventHandlers(item);
                     item.relocate(event.getX(), event.getY());
 
                     getChildren().add(item);
@@ -122,6 +110,21 @@ public class Diagram extends Pane {
             }
             event.setDropCompleted(success);
             event.consume();
+        });
+    }
+
+    private void installItemEventHandlers(CanvasItem item) {
+        item.addEventHandler(DiagramItemMouseEvent.SELECTED, event -> {
+            //TODO: handle selected
+        });
+        item.addEventHandler(DiagramItemMouseEvent.MOVE_STARTED, event -> {
+            //TODO: handle move started
+        });
+        item.addEventHandler(DiagramItemMouseEvent.MOVING, event -> {
+            //TODO: handle moving
+        });
+        item.addEventHandler(DiagramItemMouseEvent.MOVE_FINISHED, event -> {
+            //TODO: handle moving
         });
     }
 
@@ -167,8 +170,8 @@ public class Diagram extends Pane {
                 if( !event.isShiftDown() && !event.isControlDown()) {
                     clearSelection();
                 }
-                for (Node item : getChildren().stream().filter(node -> node instanceof DiagramItem).collect(Collectors.toList())) {
-                    DiagramItem diagramItem = (DiagramItem)item;
+                for (Node item : getChildren().stream().filter(node -> node instanceof CanvasItem).collect(Collectors.toList())) {
+                    CanvasItem diagramItem = (CanvasItem)item;
                     if (diagramItem.getBoundsInParent().intersects(rubberBandRect.getBoundsInParent())) {
                         if (event.isShiftDown()) {
                             select(diagramItem);
