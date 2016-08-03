@@ -26,6 +26,21 @@ public abstract class DiagramItem extends Canvas {
     private List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
 
+    private BooleanProperty resizable = new SimpleBooleanProperty(this, "resizable", true);
+
+    public final BooleanProperty resizableProperty() {
+        return resizable;
+    }
+
+    @Override
+    public final boolean isResizable() {
+        return resizable.get();
+    }
+
+    public final void setResizable(boolean resizable) {
+        this.resizable.set(resizable);
+    }
+
     private BooleanProperty selected = new SimpleBooleanProperty(this, "selected", false);
 
     public final BooleanProperty selectedProperty() {
@@ -63,7 +78,19 @@ public abstract class DiagramItem extends Canvas {
     public DiagramItem(String id, double width, double height) {
         super(width, height);
         setId(id);
-        controlPoints.addAll(setupControlPoints());
+
+        if (isResizable()) {
+            controlPoints.addAll(setupControlPoints());
+        }
+        resizable.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                controlPoints.addAll(setupControlPoints());
+            } else {
+                controlPoints.clear();
+            }
+            draw();
+        });
+
         this.widthProperty().addListener(listener -> {
             redraw();
         });
@@ -161,11 +188,6 @@ public abstract class DiagramItem extends Canvas {
     }
 
     protected abstract Collection<? extends ControlPoint> setupControlPoints();
-
-    @Override
-    public boolean isResizable() {
-        return true;
-    }
 
     @Override
     public boolean equals(Object obj) {
