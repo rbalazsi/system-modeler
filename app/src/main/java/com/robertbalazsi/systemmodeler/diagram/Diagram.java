@@ -197,10 +197,11 @@ public class Diagram extends Pane {
             rubberBandInitY = event.getY();
 
             rubberBandRect = new Rectangle(rubberBandInitX, rubberBandInitY, 0, 0);
-            rubberBandRect.setStroke(Color.BLUE);
-            rubberBandRect.setStrokeWidth(1);
+            rubberBandRect.setStroke(Color.GRAY);
+            rubberBandRect.setStrokeWidth(0.5);
+            rubberBandRect.getStrokeDashArray().addAll(6.0);
             rubberBandRect.setStrokeLineCap(StrokeLineCap.ROUND);
-            rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.4));
+            rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.3));
             getChildren().add(rubberBandRect);
 
             event.consume();
@@ -234,7 +235,7 @@ public class Diagram extends Pane {
                 }
                 for (Node item : getChildren().stream().filter(node -> node instanceof DiagramItem).collect(Collectors.toList())) {
                     DiagramItem diagramItem = (DiagramItem)item;
-                    if (diagramItem.getBoundsInParent().intersects(rubberBandRect.getBoundsInParent())) {
+                    if (rubberBandRect.getBoundsInParent().contains(diagramItem.getBoundsInParent())) {
                         if (event.isShiftDown()) {
                             select(diagramItem);
                         } else if (event.isControlDown()) {
