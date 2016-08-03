@@ -12,6 +12,7 @@ public class PaletteItemRegistry {
     public static final String ELLIPSE = "Ellipse";
     public static final String ROUNDED_RECTANGLE = "Rounded rectangle";
     public static final String TRIANGLE = "Triangle";
+    public static final String LABEL = "Label";
 
     public static long itemCtr = 0;
 
@@ -28,6 +29,8 @@ public class PaletteItemRegistry {
             return new RoundedRectangle(nextId, 200, 100, 15, 15);
         } else if (TRIANGLE.equals(name)) {
             return new Triangle(nextId, 200, 100);
+        } else if (LABEL.equals(name)) {
+            return new Label(nextId, 200, 100);
         }
         throw new IllegalArgumentException(String.format("Shape '%s' not found in the registry.", name));
     }

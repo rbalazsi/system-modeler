@@ -1,0 +1,27 @@
+1. Adding label (a.k.a. text?) to diagram items
+ - label FX string property
+ - double click triggers EDITING diagram item event
+ - parent Diagram display a text box in which user enters text
+ - pressing ENTER triggers new line
+ - clicking away saves the label
+ - expose styling as properties: Hor. , Vert. alignment, font size and color
+ - !! reuse Label diagram item? standalone and attached to other item?
+ - if font size is too big, recalculate width, resize parent but maintain its shape with same size (additional padding from width is calculated)
+     => see: http://stackoverflow.com/questions/13015698/how-to-calculate-the-pixel-width-of-a-string-in-javafx
+
+2. Vector graphics
+ - define a custom control point
+ - moving it modifies the bounded box of the parent item
+     => need to recalculate and resize parent accordingly
+ - parent item decides what to do with them
+     => most probably they will form paths of some shape to draw
+
+3. Arrows (REQUIRES Vector graphics)
+ - another category of items
+ - control points define the ends, they can be moved freely
+ - expose a thickness property
+ - other control points can also be added to make it free-form (not necessarily a straight line)
+ - ?? curve-based arrows (bezier curves)?
+ - can link two items together
+    => if item moves/resizes, they need to be updated/redrawn as well
+ - multiple arrow styles (see MS Visio for ideas)
