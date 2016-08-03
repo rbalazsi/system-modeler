@@ -2,6 +2,8 @@ package com.robertbalazsi.systemmodeler.diagram;
 
 import com.google.common.collect.Lists;
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -15,20 +17,38 @@ import java.util.List;
  * Defines an item on a diagram.
  */
 public abstract class DiagramItem extends Canvas {
+    public static final double DEFAULT_PADDING = 3;
+
     private boolean isMoving = false;
+    private boolean isResizing = false;
     private List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
     private boolean selected = false;
 
+    private DoubleProperty padding = new SimpleDoubleProperty(this, "padding", DEFAULT_PADDING);
+
+    public final DoubleProperty paddingProperty() {
+        return padding;
+    }
+
+    public final double getPadding() {
+        return padding.get();
+    }
+
+    public final void setPadding(double padding) {
+        this.padding.set(padding);
+    }
+
     public DiagramItem(String id, double width, double height) {
         super(width, height);
         setId(id);
-        drawItem();
         controlPoints.addAll(setupControlPoints());
 
         this.setOnMouseClicked(event -> {
             if (isMoving) {
                 isMoving = false;
+            } else if (isResizing) {
+                isResizing = false;
             } else {
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.SELECTED, event));
             }
@@ -69,6 +89,7 @@ public abstract class DiagramItem extends Canvas {
 
         this.setOnMouseDragged(event -> {
             if (selectedControlPoint != null) {
+                isResizing = true;
                 controlPoints.forEach(point -> {
                     point.clear();
                     point.refreshBounds();

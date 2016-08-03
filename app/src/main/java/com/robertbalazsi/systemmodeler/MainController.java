@@ -34,7 +34,9 @@ public class MainController implements Initializable {
 
         PaletteItemCategory basicShapes = new PaletteItemCategory("Basic Shapes");
         basicShapes.getItems().add(PaletteItemRegistry.RECTANGLE);
+        basicShapes.getItems().add(PaletteItemRegistry.ROUNDED_RECTANGLE);
         basicShapes.getItems().add(PaletteItemRegistry.CIRCLE);
+        basicShapes.getItems().add(PaletteItemRegistry.ELLIPSE);
 
         PaletteItemCategory umlClassDiagram = new PaletteItemCategory("UML - class diagram");
         umlClassDiagram.getItems().add("Class");

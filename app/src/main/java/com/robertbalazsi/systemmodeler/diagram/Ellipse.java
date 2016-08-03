@@ -15,6 +15,7 @@ public class Ellipse extends DiagramItem {
 
     public Ellipse(String id, double width, double height) {
         super(id, width, height);
+        drawItem();
     }
 
     @Override
@@ -38,8 +39,7 @@ public class Ellipse extends DiagramItem {
         GraphicsContext gc = this.getGraphicsContext2D();
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.TRANSPARENT);
-        //TODO: extract border size as property?
-        gc.fillOval(3, 3, getWidth() - 6, getHeight() - 6);
+        gc.fillOval(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding());
         gc.save();
     }
 }
