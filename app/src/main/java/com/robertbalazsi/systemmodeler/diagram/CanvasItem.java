@@ -2,10 +2,11 @@ package com.robertbalazsi.systemmodeler.diagram;
 
 import com.google.common.collect.Lists;
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
-import com.robertbalazsi.systemmodeler.controlpoint.Location;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,16 +16,13 @@ import java.util.List;
  */
 public abstract class CanvasItem extends Canvas {
     private boolean isMoving = false;
-    private double initMouseX, initMouseY;
-    private double initTranslateX, initTranslateY;
-
     private List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
     private boolean selected = false;
 
-    public CanvasItem(double width, double height) {
+    public CanvasItem(String id, double width, double height) {
         super(width, height);
-
+        setId(id);
         drawItem();
         controlPoints.addAll(setupControlPoints());
 
@@ -32,7 +30,6 @@ public abstract class CanvasItem extends Canvas {
             if (isMoving) {
                 isMoving = false;
             } else {
-                select();
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.SELECTED, event));
             }
 
@@ -61,11 +58,6 @@ public abstract class CanvasItem extends Canvas {
 
         this.setOnMousePressed(event -> {
             selectedControlPoint = getSelectedControlPoint(event.getX(), event.getY());
-            initMouseX = event.getSceneX();
-            initMouseY = event.getSceneY();
-            initTranslateX = getTranslateX();
-            initTranslateY = getTranslateY();
-
             if (selectedControlPoint != null) {
                 selectedControlPoint.receiveMousePressed(event);
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZE_STARTED, event));
@@ -95,10 +87,6 @@ public abstract class CanvasItem extends Canvas {
             } else {
                 isMoving = true;
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVING, event));
-
-//                TODO: diagram should handle this
-//                setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
-//                setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
             }
             event.consume();
         });
@@ -130,6 +118,17 @@ public abstract class CanvasItem extends Canvas {
         selected = false;
         clear();
         drawItem();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return !(obj == null || !getClass().equals(obj.getClass())) &&
+                new EqualsBuilder().append(getId(), ((CanvasItem) obj).getId()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(getId()).hashCode();
     }
 
     protected abstract void drawItem();

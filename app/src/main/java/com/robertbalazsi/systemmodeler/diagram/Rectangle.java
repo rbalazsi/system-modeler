@@ -13,8 +13,8 @@ import java.util.Collection;
  */
 public class Rectangle extends CanvasItem {
 
-    public Rectangle(double width, double height) {
-        super(width, height);
+    public Rectangle(String id, double width, double height) {
+        super(id, width, height);
     }
 
     @Override

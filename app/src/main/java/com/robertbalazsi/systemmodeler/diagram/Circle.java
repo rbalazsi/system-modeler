@@ -13,8 +13,8 @@ import java.util.Collection;
  */
 public class Circle extends CanvasItem {
 
-    public Circle(double size) {
-        super(size, size);
+    public Circle(String id, double diameter) {
+        super(id, diameter, diameter);
     }
 
     @Override

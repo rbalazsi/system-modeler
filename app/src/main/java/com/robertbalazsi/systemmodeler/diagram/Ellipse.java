@@ -13,8 +13,8 @@ import java.util.Collection;
  */
 public class Ellipse extends CanvasItem {
 
-    public Ellipse(double width, double height) {
-        super(width, height);
+    public Ellipse(String id, double width, double height) {
+        super(id, width, height);
     }
 
     @Override

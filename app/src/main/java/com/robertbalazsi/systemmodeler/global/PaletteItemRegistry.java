@@ -16,14 +16,17 @@ public class PaletteItemRegistry {
     public static final String CIRCLE = "Circle";
     public static final String ELLIPSE = "Ellipse";
 
+    public static long itemCtr = 0;
+
     public static CanvasItem getItem(String name) {
         //TODO: make it polymorphic
+        String nextId = "item_" + (++itemCtr);
         if (RECTANGLE.equals(name)) {
-            return new Rectangle(200.0, 100.0);
+            return new Rectangle(nextId, 200.0, 100.0);
         } else if (CIRCLE.equals(name)) {
-            return new Circle(100.0);
+            return new Circle(nextId, 100.0);
         } else if (ELLIPSE.equals(name)) {
-            return new Ellipse(200.0, 100.0);
+            return new Ellipse(nextId, 200.0, 100.0);
         }
         throw new IllegalArgumentException(String.format("Shape '%s' not found in the registry.", name));
     }

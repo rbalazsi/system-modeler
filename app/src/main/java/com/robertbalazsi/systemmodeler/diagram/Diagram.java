@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
@@ -12,6 +13,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,7 +25,9 @@ public class Diagram extends Pane {
 
     //TODO observable collection?
     private Set<CanvasItem> selection = Sets.newHashSet();
+    private Map<CanvasItem, InitialState> initialStateMap = new HashMap<>();
     private boolean rubberBandSelect = false;
+    private boolean isMultiMove = false;
     private double rubberBandInitX, rubberBandInitY;
     private Rectangle rubberBandRect;
 
@@ -58,6 +63,7 @@ public class Diagram extends Pane {
     public void deselect(CanvasItem item) {
         item.deselect();
         selection.remove(item);
+        initialStateMap.remove(item);
     }
 
     public boolean isSelected(CanvasItem item) {
@@ -115,16 +121,68 @@ public class Diagram extends Pane {
 
     private void installItemEventHandlers(CanvasItem item) {
         item.addEventHandler(DiagramItemMouseEvent.SELECTED, event -> {
-            //TODO: handle selected
+            MouseEvent mouseEvent = event.getMouseEvent();
+            if (!mouseEvent.isShiftDown() && !mouseEvent.isControlDown()) {
+                clearSelection();
+            }
+            if (mouseEvent.isControlDown() && isSelected(item)) {
+                deselect(item);
+            } else {
+                if (!isSelected(item)) {
+                    select(item);
+                }
+            }
+            event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.MOVE_STARTED, event -> {
-            //TODO: handle move started
+            isMultiMove = isSelected(item);
+            MouseEvent mouseEvent = event.getMouseEvent();
+
+            // Move current item
+            if (!isMultiMove) {
+                initialStateMap.put(item, new InitialState(
+                        mouseEvent.getSceneX(),
+                        mouseEvent.getSceneY(),
+                        item.getTranslateX(),
+                        item.getTranslateY()
+                ));
+            }
+            // Move all selected items
+            else {
+                selection.forEach(selectedItem -> {
+                    initialStateMap.put(selectedItem, new InitialState(
+                            mouseEvent.getSceneX(),
+                            mouseEvent.getSceneY(),
+                            selectedItem.getTranslateX(),
+                            selectedItem.getTranslateY()
+                    ));
+                });
+            }
+            event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.MOVING, event -> {
-            //TODO: handle moving
+            setCursor(Cursor.MOVE);
+            MouseEvent mouseEvent = event.getMouseEvent();
+            if (!isMultiMove) {
+                InitialState initState = initialStateMap.get(item);
+                item.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
+                item.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
+            } else {
+                initialStateMap.entrySet().forEach(entry -> {
+                    CanvasItem selectedItem = entry.getKey();
+                    InitialState initState = entry.getValue();
+
+                    selectedItem.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
+                    selectedItem.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
+                });
+            }
+            event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.MOVE_FINISHED, event -> {
-            //TODO: handle moving
+            setCursor(Cursor.DEFAULT);
+            isMultiMove = false;
+            initialStateMap.clear();
+            event.consume();
         });
     }
 
@@ -192,5 +250,19 @@ public class Diagram extends Pane {
             }
             event.consume();
         });
+    }
+
+    private static class InitialState {
+        private final double initMouseX;
+        private final double initMouseY;
+        private final double initTranslateX;
+        private final double initTranslateY;
+
+        public InitialState(final double initMouseX, final double initMouseY, final double initTranslateX, final double initTranslateY) {
+            this.initMouseX = initMouseX;
+            this.initMouseY = initMouseY;
+            this.initTranslateX = initTranslateX;
+            this.initTranslateY = initTranslateY;
+        }
     }
 }

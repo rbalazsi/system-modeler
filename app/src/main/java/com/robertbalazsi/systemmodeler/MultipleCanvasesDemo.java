@@ -27,7 +27,7 @@ public class MultipleCanvasesDemo extends Application {
         //TODO: Add children
 //        CanvasItem item = new Rectangle(200, 100);
 //        CanvasItem item = new Circle(200);
-        CanvasItem item = new Ellipse(200, 100);
+        CanvasItem item = new Ellipse("ellipse_1", 200, 100);
         item.relocate(250, 300);
 
         rootPane.setOnMouseClicked(event -> {
