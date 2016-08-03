@@ -56,12 +56,12 @@ public class Diagram extends Pane {
     }
 
     public void select(DiagramItem item) {
-        item.select();
+        item.setSelected(true);
         selection.add(item);
     }
 
     public void deselect(DiagramItem item) {
-        item.deselect();
+        item.setSelected(false);
         selection.remove(item);
         initialStateMap.remove(item);
     }
@@ -76,8 +76,9 @@ public class Diagram extends Pane {
 
     public void clearSelection() {
         // Also hide the borders of the items
-        selection.forEach(DiagramItem::deselect);
+        selection.forEach(item -> item.setSelected(false));
         selection.clear();
+        initialStateMap.clear();
     }
 
     private boolean mousePointerInAnyCanvasItem(double mouseX, double mouseY) {

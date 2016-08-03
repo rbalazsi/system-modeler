@@ -15,7 +15,7 @@ public class Ellipse extends DiagramItem {
 
     public Ellipse(String id, double width, double height) {
         super(id, width, height);
-        drawItem();
+        draw();
     }
 
     @Override
@@ -35,7 +35,7 @@ public class Ellipse extends DiagramItem {
     }
 
     @Override
-    protected void drawItem() {
+    protected void draw() {
         GraphicsContext gc = this.getGraphicsContext2D();
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.TRANSPARENT);

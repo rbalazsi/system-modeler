@@ -2,8 +2,6 @@ package com.robertbalazsi.systemmodeler.diagram;
 
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
 import com.robertbalazsi.systemmodeler.controlpoint.Location;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -17,7 +15,7 @@ public class Rectangle extends DiagramItem {
 
     public Rectangle(String id, double width, double height) {
         super(id, width, height);
-        drawItem();
+        draw();
     }
 
     @Override
@@ -37,7 +35,7 @@ public class Rectangle extends DiagramItem {
     }
 
     @Override
-    protected void drawItem() {
+    protected void draw() {
         GraphicsContext gc = this.getGraphicsContext2D();
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.TRANSPARENT);

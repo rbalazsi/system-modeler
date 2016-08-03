@@ -32,7 +32,8 @@ public class Circle extends DiagramItem {
     public Circle(String id, double diameter) {
         super(id, diameter, diameter);
         setDiameter(diameter);
-        drawItem();
+        draw();
+        this.diameter.addListener(listener -> {redraw();});
     }
 
     @Override
@@ -47,11 +48,10 @@ public class Circle extends DiagramItem {
     }
 
     @Override
-    protected void drawItem() {
+    protected void draw() {
         GraphicsContext gc = this.getGraphicsContext2D();
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.TRANSPARENT);
-        //TODO: extract border size as property?
         gc.fillOval(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding());
         gc.save();
     }

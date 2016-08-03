@@ -47,7 +47,9 @@ public class RoundedRectangle extends DiagramItem {
         super(id, width, height);
         setArcWidth(arcWidth);
         setArcHeight(arcHeight);
-        drawItem();
+        draw();
+        this.arcWidth.addListener(listener -> {redraw();});
+        this.arcHeight.addListener(listener -> {redraw();});
     }
 
     @Override
@@ -67,7 +69,7 @@ public class RoundedRectangle extends DiagramItem {
     }
 
     @Override
-    protected void drawItem() {
+    protected void draw() {
         GraphicsContext gc = this.getGraphicsContext2D();
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.TRANSPARENT);

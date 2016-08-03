@@ -2,7 +2,9 @@ package com.robertbalazsi.systemmodeler.diagram;
 
 import com.google.common.collect.Lists;
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -23,7 +25,26 @@ public abstract class DiagramItem extends Canvas {
     private boolean isResizing = false;
     private List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
-    private boolean selected = false;
+
+    private BooleanProperty selected = new SimpleBooleanProperty(this, "selected", false);
+
+    public final BooleanProperty selectedProperty() {
+        return selected;
+    }
+
+    public final boolean isSelected() {
+        return selected.get();
+    }
+
+    public final void setSelected(boolean selected) {
+        this.selected.set(selected);
+
+    }
+
+    public final void redraw() {
+        clear();
+        draw();
+    }
 
     private DoubleProperty padding = new SimpleDoubleProperty(this, "padding", DEFAULT_PADDING);
 
@@ -43,6 +64,23 @@ public abstract class DiagramItem extends Canvas {
         super(width, height);
         setId(id);
         controlPoints.addAll(setupControlPoints());
+        this.widthProperty().addListener(listener -> {
+            redraw();
+        });
+        this.heightProperty().addListener(listener -> {
+            redraw();
+        });
+        this.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                drawSelectionBox();
+                controlPoints.forEach(ControlPoint::deselect);
+            } else {
+                redraw();
+            }
+        });
+        this.padding.addListener(listener -> {
+            redraw();
+        });
 
         this.setOnMouseClicked(event -> {
             if (isMoving) {
@@ -57,7 +95,7 @@ public abstract class DiagramItem extends Canvas {
         });
 
         this.setOnMouseMoved(event -> {
-            if (selected) {
+            if (isSelected()) {
                 double mouseX = event.getX();
                 double mouseY = event.getY();
                 for (ControlPoint controlPoint : controlPoints) {
@@ -71,7 +109,7 @@ public abstract class DiagramItem extends Canvas {
         });
 
         this.setOnMouseExited(event -> {
-            if (selected) {
+            if (isSelected()) {
                 controlPoints.forEach(ControlPoint::deselect);
             }
         });
@@ -99,7 +137,7 @@ public abstract class DiagramItem extends Canvas {
 
                 selectedControlPoint.receiveMouseDragged(event);
                 clear();
-                drawItem();
+                draw();
                 drawSelectionBox();
 
                 controlPoints.forEach(ControlPoint::deselect);
@@ -129,18 +167,6 @@ public abstract class DiagramItem extends Canvas {
         return true;
     }
 
-    public void select() {
-        selected = true;
-        drawSelectionBox();
-        controlPoints.forEach(ControlPoint::deselect);
-    }
-
-    public void deselect() {
-        selected = false;
-        clear();
-        drawItem();
-    }
-
     @Override
     public boolean equals(Object obj) {
         return !(obj == null || !getClass().equals(obj.getClass())) &&
@@ -152,7 +178,7 @@ public abstract class DiagramItem extends Canvas {
         return new HashCodeBuilder().append(getId()).hashCode();
     }
 
-    protected abstract void drawItem();
+    protected abstract void draw();
 
     private void drawSelectionBox() {
         GraphicsContext gc = this.getGraphicsContext2D();

@@ -30,7 +30,7 @@ public class MultipleCanvasesDemo extends Application {
 
         rootPane.setOnMouseClicked(event -> {
             if (!item.getBoundsInParent().contains(event.getSceneX(), event.getSceneY())) {
-                item.deselect();
+                item.setSelected(false);
             }
         });
 
