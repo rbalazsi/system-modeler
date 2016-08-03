@@ -14,13 +14,13 @@ import java.util.List;
 /**
  * Defines an item on a diagram.
  */
-public abstract class CanvasItem extends Canvas {
+public abstract class DiagramItem extends Canvas {
     private boolean isMoving = false;
     private List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
     private boolean selected = false;
 
-    public CanvasItem(String id, double width, double height) {
+    public DiagramItem(String id, double width, double height) {
         super(width, height);
         setId(id);
         drawItem();
@@ -123,7 +123,7 @@ public abstract class CanvasItem extends Canvas {
     @Override
     public boolean equals(Object obj) {
         return !(obj == null || !getClass().equals(obj.getClass())) &&
-                new EqualsBuilder().append(getId(), ((CanvasItem) obj).getId()).isEquals();
+                new EqualsBuilder().append(getId(), ((DiagramItem) obj).getId()).isEquals();
     }
 
     @Override

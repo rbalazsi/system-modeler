@@ -1,9 +1,7 @@
 package com.robertbalazsi.systemmodeler;
 
-import com.robertbalazsi.systemmodeler.diagram.CanvasItem;
-import com.robertbalazsi.systemmodeler.diagram.Circle;
+import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
 import com.robertbalazsi.systemmodeler.diagram.Ellipse;
-import com.robertbalazsi.systemmodeler.diagram.Rectangle;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -25,9 +23,9 @@ public class MultipleCanvasesDemo extends Application {
         rootPane.setPrefHeight(600);
 
         //TODO: Add children
-//        CanvasItem item = new Rectangle(200, 100);
-//        CanvasItem item = new Circle(200);
-        CanvasItem item = new Ellipse("ellipse_1", 200, 100);
+//        DiagramItem item = new Rectangle(200, 100);
+//        DiagramItem item = new Circle(200);
+        DiagramItem item = new Ellipse("ellipse_1", 200, 100);
         item.relocate(250, 300);
 
         rootPane.setOnMouseClicked(event -> {

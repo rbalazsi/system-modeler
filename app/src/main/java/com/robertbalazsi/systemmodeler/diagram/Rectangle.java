@@ -11,7 +11,7 @@ import java.util.Collection;
 /**
  * A rectangle on a diagram. 
  */
-public class Rectangle extends CanvasItem {
+public class Rectangle extends DiagramItem {
 
     public Rectangle(String id, double width, double height) {
         super(id, width, height);

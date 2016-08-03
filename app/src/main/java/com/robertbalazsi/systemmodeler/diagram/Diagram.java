@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 public class Diagram extends Pane {
 
     //TODO observable collection?
-    private Set<CanvasItem> selection = Sets.newHashSet();
-    private Map<CanvasItem, InitialState> initialStateMap = new HashMap<>();
+    private Set<DiagramItem> selection = Sets.newHashSet();
+    private Map<DiagramItem, InitialState> initialStateMap = new HashMap<>();
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
     private double rubberBandInitX, rubberBandInitY;
@@ -55,28 +55,28 @@ public class Diagram extends Pane {
         });
     }
 
-    public void select(CanvasItem item) {
+    public void select(DiagramItem item) {
         item.select();
         selection.add(item);
     }
 
-    public void deselect(CanvasItem item) {
+    public void deselect(DiagramItem item) {
         item.deselect();
         selection.remove(item);
         initialStateMap.remove(item);
     }
 
-    public boolean isSelected(CanvasItem item) {
+    public boolean isSelected(DiagramItem item) {
         return selection.contains(item);
     }
 
-    public Set<CanvasItem> allSelected() {
+    public Set<DiagramItem> allSelected() {
         return selection;
     }
 
     public void clearSelection() {
         // Also hide the borders of the items
-        selection.forEach(CanvasItem::deselect);
+        selection.forEach(DiagramItem::deselect);
         selection.clear();
     }
 
@@ -105,7 +105,7 @@ public class Diagram extends Pane {
             Dragboard dragboard = event.getDragboard();
             boolean success = false;
             if (dragboard.hasString()) {
-                CanvasItem item = PaletteItemRegistry.getItem(dragboard.getString());
+                DiagramItem item = PaletteItemRegistry.getItem(dragboard.getString());
                 if (item != null) {
                     installItemEventHandlers(item);
                     item.relocate(event.getX(), event.getY());
@@ -119,7 +119,7 @@ public class Diagram extends Pane {
         });
     }
 
-    private void installItemEventHandlers(CanvasItem item) {
+    private void installItemEventHandlers(DiagramItem item) {
         item.addEventHandler(DiagramItemMouseEvent.SELECTED, event -> {
             MouseEvent mouseEvent = event.getMouseEvent();
             if (!mouseEvent.isShiftDown() && !mouseEvent.isControlDown()) {
@@ -149,14 +149,12 @@ public class Diagram extends Pane {
             }
             // Move all selected items
             else {
-                selection.forEach(selectedItem -> {
-                    initialStateMap.put(selectedItem, new InitialState(
-                            mouseEvent.getSceneX(),
-                            mouseEvent.getSceneY(),
-                            selectedItem.getTranslateX(),
-                            selectedItem.getTranslateY()
-                    ));
-                });
+                selection.forEach(selectedItem -> initialStateMap.put(selectedItem, new InitialState(
+                        mouseEvent.getSceneX(),
+                        mouseEvent.getSceneY(),
+                        selectedItem.getTranslateX(),
+                        selectedItem.getTranslateY()
+                )));
             }
             event.consume();
         });
@@ -169,7 +167,7 @@ public class Diagram extends Pane {
                 item.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
             } else {
                 initialStateMap.entrySet().forEach(entry -> {
-                    CanvasItem selectedItem = entry.getKey();
+                    DiagramItem selectedItem = entry.getKey();
                     InitialState initState = entry.getValue();
 
                     selectedItem.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
@@ -228,8 +226,8 @@ public class Diagram extends Pane {
                 if( !event.isShiftDown() && !event.isControlDown()) {
                     clearSelection();
                 }
-                for (Node item : getChildren().stream().filter(node -> node instanceof CanvasItem).collect(Collectors.toList())) {
-                    CanvasItem diagramItem = (CanvasItem)item;
+                for (Node item : getChildren().stream().filter(node -> node instanceof DiagramItem).collect(Collectors.toList())) {
+                    DiagramItem diagramItem = (DiagramItem)item;
                     if (diagramItem.getBoundsInParent().intersects(rubberBandRect.getBoundsInParent())) {
                         if (event.isShiftDown()) {
                             select(diagramItem);

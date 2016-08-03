@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * Created by robi on 8/2/16.
+ * An ellipse on a diagram.
  */
-public class Ellipse extends CanvasItem {
+public class Ellipse extends DiagramItem {
 
     public Ellipse(String id, double width, double height) {
         super(id, width, height);

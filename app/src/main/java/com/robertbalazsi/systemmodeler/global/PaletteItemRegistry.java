@@ -1,11 +1,9 @@
 package com.robertbalazsi.systemmodeler.global;
 
-import com.robertbalazsi.systemmodeler.diagram.CanvasItem;
+import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
 import com.robertbalazsi.systemmodeler.diagram.Circle;
 import com.robertbalazsi.systemmodeler.diagram.Ellipse;
 import com.robertbalazsi.systemmodeler.diagram.Rectangle;
-
-import java.util.Map;
 
 /**
  * Defines the available palette items, their names to their corresponding shapes.
@@ -18,7 +16,7 @@ public class PaletteItemRegistry {
 
     public static long itemCtr = 0;
 
-    public static CanvasItem getItem(String name) {
+    public static DiagramItem getItem(String name) {
         //TODO: make it polymorphic
         String nextId = "item_" + (++itemCtr);
         if (RECTANGLE.equals(name)) {

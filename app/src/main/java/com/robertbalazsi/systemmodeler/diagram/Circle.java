@@ -11,7 +11,7 @@ import java.util.Collection;
 /**
  * A circle on a diagram.
  */
-public class Circle extends CanvasItem {
+public class Circle extends DiagramItem {
 
     public Circle(String id, double diameter) {
         super(id, diameter, diameter);

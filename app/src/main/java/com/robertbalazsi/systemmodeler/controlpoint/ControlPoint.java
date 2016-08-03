@@ -1,6 +1,6 @@
 package com.robertbalazsi.systemmodeler.controlpoint;
 
-import com.robertbalazsi.systemmodeler.diagram.CanvasItem;
+import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
 import javafx.beans.property.*;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
@@ -74,7 +74,7 @@ public abstract class ControlPoint {
         deselectedColor.set(color);
     }
 
-    protected CanvasItem parent;
+    protected DiagramItem parent;
     protected Location location;
     protected Bounds bounds;
 
@@ -82,7 +82,7 @@ public abstract class ControlPoint {
     protected double initTranslateX, initTranslateY;
     protected double initWidth, initHeight;
 
-    protected ControlPoint(CanvasItem parent, Location location, boolean moveConstrained, double size, Color selectedColor,
+    protected ControlPoint(DiagramItem parent, Location location, boolean moveConstrained, double size, Color selectedColor,
                            Color deselectedColor) {
         this.parent = parent;
         this.location = location;
@@ -150,14 +150,14 @@ public abstract class ControlPoint {
      */
     public static class Builder {
 
-        private final CanvasItem parent;
+        private final DiagramItem parent;
         private final Location location;
         private boolean moveConstrained;
         private double size;
         private Color deselectedColor;
         private Color selectedColor;
 
-        public Builder(CanvasItem parent, Location location) {
+        public Builder(DiagramItem parent, Location location) {
             this.parent = parent;
             this.location = location;
         }
@@ -220,7 +220,7 @@ public abstract class ControlPoint {
      */
     private static class TopLeft extends ControlPoint {
 
-        TopLeft(CanvasItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
+        TopLeft(DiagramItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.TOP_LEFT, moveConstrained, size, selectedColor, deselectedColor);
         }
 
@@ -249,7 +249,7 @@ public abstract class ControlPoint {
      */
     private static class TopCenter extends ControlPoint {
 
-        TopCenter(CanvasItem parent, double size, Color selectedColor, Color deselectedColor) {
+        TopCenter(DiagramItem parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.TOP_CENTER, true, size, selectedColor, deselectedColor);
         }
 
@@ -270,7 +270,7 @@ public abstract class ControlPoint {
      */
     private static class TopRight extends ControlPoint {
 
-        TopRight(CanvasItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
+        TopRight(DiagramItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.TOP_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
         }
 
@@ -298,7 +298,7 @@ public abstract class ControlPoint {
      */
     private static class MiddleLeft extends ControlPoint {
 
-        MiddleLeft(CanvasItem parent, double size, Color selectedColor, Color deselectedColor) {
+        MiddleLeft(DiagramItem parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.MIDDLE_LEFT, true, size, selectedColor, deselectedColor);
         }
 
@@ -319,7 +319,7 @@ public abstract class ControlPoint {
      */
     private static class MiddleRight extends ControlPoint {
 
-        MiddleRight(CanvasItem parent, double size, Color selectedColor, Color deselectedColor) {
+        MiddleRight(DiagramItem parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.MIDDLE_RIGHT, true, size, selectedColor, deselectedColor);
         }
 
@@ -339,7 +339,7 @@ public abstract class ControlPoint {
      */
     private static class BottomLeft extends ControlPoint {
 
-        BottomLeft(CanvasItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
+        BottomLeft(DiagramItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.BOTTOM_LEFT, moveConstrained, size, selectedColor, deselectedColor);
         }
 
@@ -365,7 +365,7 @@ public abstract class ControlPoint {
      */
     private static class BottomCenter extends ControlPoint {
 
-        BottomCenter(CanvasItem parent, double size, Color selectedColor, Color deselectedColor) {
+        BottomCenter(DiagramItem parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.BOTTOM_CENTER, true, size, selectedColor, deselectedColor);
         }
 
@@ -385,7 +385,7 @@ public abstract class ControlPoint {
      */
     private static class BottomRight extends ControlPoint {
 
-        BottomRight(CanvasItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
+        BottomRight(DiagramItem parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Location.BOTTOM_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
         }
 
