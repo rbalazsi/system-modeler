@@ -75,6 +75,14 @@ public abstract class DiagramItem extends Canvas {
         this.padding.set(padding);
     }
 
+    /**
+     * A hook method for supporting items that always maintain their aspect ratio when resizing (for example, Circles)
+     * @return True, if the item always maintains its aspect ratio, false otherwise.
+     */
+    public boolean alwaysMaintainsAspectRatio() {
+        return false;
+    }
+
     public DiagramItem(String id, double width, double height) {
         super(width, height);
         setId(id);
@@ -160,7 +168,9 @@ public abstract class DiagramItem extends Canvas {
                     point.refreshBounds();
                 });
 
-                //TODO: constrain move on ctrl pressed, but make exceptions to Circle, and other inherently constrained items
+                if (!this.alwaysMaintainsAspectRatio()) {
+                    selectedControlPoint.setMoveConstrained(event.isControlDown());
+                }
 
                 selectedControlPoint.receiveMouseDragged(event);
                 clear();

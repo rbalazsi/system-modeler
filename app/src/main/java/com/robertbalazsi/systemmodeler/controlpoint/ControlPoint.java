@@ -350,7 +350,7 @@ public abstract class ControlPoint {
             if (!isMoveConstrained()) {
                 parent.setHeight(initHeight + event.getSceneY() - initMouseY);
             } else {
-                parent.setHeight(initHeight + event.getSceneX() - initMouseX);
+                parent.setHeight(initHeight + initMouseX - event.getSceneX());
             }
         }
 

@@ -1,7 +1,10 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
-import com.google.common.collect.Sets;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
+import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleSetProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -15,7 +18,6 @@ import javafx.scene.shape.StrokeLineCap;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -23,8 +25,15 @@ import java.util.stream.Collectors;
  */
 public class Diagram extends Pane {
 
-    //TODO observable collection?
-    private Set<DiagramItem> selection = Sets.newHashSet();
+    private SetProperty<DiagramItem> selectedItems = new SimpleSetProperty<>(this, "selectedItems", FXCollections.observableSet());
+
+    public SetProperty<DiagramItem> selectedItemsProperty() {
+        return selectedItems;
+    }
+
+    public ObservableSet<DiagramItem> getSelectedItems() {
+        return selectedItems.get();
+    }
     private Map<DiagramItem, InitialState> initialStateMap = new HashMap<>();
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
@@ -57,27 +66,23 @@ public class Diagram extends Pane {
 
     public void select(DiagramItem item) {
         item.setSelected(true);
-        selection.add(item);
+        selectedItems.add(item);
     }
 
     public void deselect(DiagramItem item) {
         item.setSelected(false);
-        selection.remove(item);
+        selectedItems.remove(item);
         initialStateMap.remove(item);
     }
 
     public boolean isSelected(DiagramItem item) {
-        return selection.contains(item);
-    }
-
-    public Set<DiagramItem> allSelected() {
-        return selection;
+        return selectedItems.contains(item);
     }
 
     public void clearSelection() {
         // Also hide the borders of the items
-        selection.forEach(item -> item.setSelected(false));
-        selection.clear();
+        selectedItems.forEach(item -> item.setSelected(false));
+        selectedItems.clear();
         initialStateMap.clear();
     }
 
@@ -150,7 +155,7 @@ public class Diagram extends Pane {
             }
             // Move all selected items
             else {
-                selection.forEach(selectedItem -> initialStateMap.put(selectedItem, new InitialState(
+                selectedItems.forEach(selectedItem -> initialStateMap.put(selectedItem, new InitialState(
                         mouseEvent.getSceneX(),
                         mouseEvent.getSceneY(),
                         selectedItem.getTranslateX(),

@@ -55,4 +55,9 @@ public class Circle extends DiagramItem {
         gc.fillOval(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding());
         gc.save();
     }
+
+    @Override
+    public boolean alwaysMaintainsAspectRatio() {
+        return true;
+    }
 }
