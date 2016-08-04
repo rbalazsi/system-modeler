@@ -3,6 +3,7 @@ package com.robertbalazsi.systemmodeler.diagram;
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
 import com.robertbalazsi.systemmodeler.controlpoint.Location;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 
 import java.util.Arrays;
@@ -40,6 +41,7 @@ public class Ellipse extends DiagramItem {
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.TRANSPARENT);
         gc.fillOval(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding());
+        gc.applyEffect(new DropShadow(2.0, 3.0, 3.0, Color.GREY));
         gc.save();
     }
 }

@@ -2,13 +2,18 @@ package com.robertbalazsi.systemmodeler.diagram;
 
 import com.google.common.collect.Lists;
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
+import javafx.geometry.Bounds;
+import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -20,6 +25,9 @@ import java.util.List;
  */
 public abstract class DiagramItem extends Canvas {
     public static final double DEFAULT_PADDING = 3;
+    public static final TextAlignment DEFAULT_TEXT_ALIGN = TextAlignment.CENTER;
+    public static final VPos DEFAULT_TEXT_BASELINE = VPos.CENTER;
+    public static final Paint DEFAULT_FILL = Color.BLACK;
 
     private boolean isMoving = false;
     private boolean isResizing = false;
@@ -56,11 +64,6 @@ public abstract class DiagramItem extends Canvas {
 
     }
 
-    public final void redraw() {
-        clear();
-        draw();
-    }
-
     private DoubleProperty padding = new SimpleDoubleProperty(this, "padding", DEFAULT_PADDING);
 
     public final DoubleProperty paddingProperty() {
@@ -73,6 +76,76 @@ public abstract class DiagramItem extends Canvas {
 
     public final void setPadding(double padding) {
         this.padding.set(padding);
+    }
+
+    private StringProperty text = new SimpleStringProperty(this, "text");
+
+    public final StringProperty textProperty() {
+        return text;
+    }
+
+    public final String getText() {
+        return text.get();
+    }
+
+    public final void setText(String text) {
+        this.text.set(text);
+    }
+
+    private ObjectProperty<TextAlignment> textAlign = new SimpleObjectProperty<>(this, "textAlign", DEFAULT_TEXT_ALIGN);
+
+    public final ObjectProperty<TextAlignment> textAlignProperty() {
+        return textAlign;
+    }
+
+    public final TextAlignment getTextAlign() {
+        return textAlign.get();
+    }
+
+    public final void setTextAlign(TextAlignment textAlign) {
+        this.textAlign.set(textAlign);
+    }
+
+    private ObjectProperty<VPos> textBaseline = new SimpleObjectProperty<>(this, "textBaseline", DEFAULT_TEXT_BASELINE);
+
+    public final ObjectProperty<VPos> textBaselineProperty() {
+        return textBaseline;
+    }
+
+    public final VPos getTextBaseline() {
+        return textBaseline.get();
+    }
+
+    public final void setTextBaseline(VPos textBaseline) {
+        this.textBaseline.set(textBaseline);
+    }
+
+    private ObjectProperty<Font> font = new SimpleObjectProperty<>(this, "font", Font.getDefault());
+
+    public final ObjectProperty<Font> fontProperty() {
+        return font;
+    }
+
+    public final Font getFont() {
+        return font.get();
+    }
+
+    public final void setFont(Font font) {
+        this.font.set(font);
+    }
+
+    private ObjectProperty<Paint> textFill = new SimpleObjectProperty<>(this, "textFill", DEFAULT_FILL);
+
+    public final ObjectProperty<Paint> textFillProperty() {
+        return textFill;
+    }
+
+    public final Paint getTextFill() {
+        return textFill.get();
+    }
+
+    public final void setTextFill(Paint textFill) {
+        this.textFill.set(textFill);
     }
 
     /**
@@ -113,7 +186,43 @@ public abstract class DiagramItem extends Canvas {
                 redraw();
             }
         });
-        this.padding.addListener(listener -> {
+        this.paddingProperty().addListener(listener -> {
+            redraw();
+        });
+        this.textProperty().addListener(listener -> {
+            redraw();
+        });
+        this.fontProperty().addListener((observable, oldValue, newValue) -> {
+            Text text = new Text(this.getText());
+            text.setFont(newValue);
+            Bounds bounds = text.getLayoutBounds();
+            if (bounds.getWidth() > this.getWidth() || bounds.getHeight() > this.getHeight()) {
+                if (bounds.getWidth() > this.getWidth()) {
+                    setTranslateX((this.getWidth() - bounds.getWidth()) / 2);
+                    setWidth(bounds.getWidth());
+                    if (alwaysMaintainsAspectRatio()) {
+                        //TODO: fix - also update translateY
+                        setHeight(getWidth());
+                    }
+                } else {
+                    setTranslateY((this.getHeight() - bounds.getHeight()) / 2);
+                    setHeight(bounds.getHeight());
+                    if (alwaysMaintainsAspectRatio()) {
+                        //TODO: fix - also update translateX
+                        setWidth(getHeight());
+                    }
+                }
+            } else {
+                redraw();
+            }
+        });
+        this.textAlignProperty().addListener(listener -> {
+            redraw();
+        });
+        this.textBaselineProperty().addListener(listener -> {
+            redraw();
+        });
+        this.textFillProperty().addListener(listener -> {
             redraw();
         });
 
@@ -122,6 +231,8 @@ public abstract class DiagramItem extends Canvas {
                 isMoving = false;
             } else if (isResizing) {
                 isResizing = false;
+            } else if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2){
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DOUBLE_CLICKED, event));
             } else {
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.SELECTED, event));
             }
@@ -211,6 +322,26 @@ public abstract class DiagramItem extends Canvas {
     }
 
     protected abstract void draw();
+
+    public final void redraw() {
+        clear();
+        draw();
+        if (!StringUtils.isEmpty(getText())) {
+            drawText();
+        }
+    }
+
+    private void drawText() {
+        GraphicsContext gc = this.getGraphicsContext2D();
+        gc.setTextAlign(getTextAlign());
+        gc.setTextBaseline(getTextBaseline());
+        gc.setFont(getFont());
+        gc.setFill(getTextFill());
+
+        //TODO: calculate the coords for different alignments
+        gc.fillText(getText(), getWidth() / 2, getHeight() / 2);
+        gc.save();
+    }
 
     private void drawSelectionBox() {
         GraphicsContext gc = this.getGraphicsContext2D();

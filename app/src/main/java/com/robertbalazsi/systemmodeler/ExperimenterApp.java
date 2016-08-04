@@ -1,23 +1,16 @@
 package com.robertbalazsi.systemmodeler;
 
-import com.robertbalazsi.systemmodeler.diagram.Circle;
-import com.robertbalazsi.systemmodeler.diagram.Diagram;
-import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
-import com.robertbalazsi.systemmodeler.diagram.Ellipse;
-import com.robertbalazsi.systemmodeler.diagram.Rectangle;
+import com.robertbalazsi.systemmodeler.diagram.*;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.*;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -31,8 +24,12 @@ public class ExperimenterApp extends Application {
     }
 
     private TextField fontSizeTextField;
+    private TextField itemTextField;
     private ComboBox fontColorComboBox;
-    private CheckBox showLabelCheckBox;
+    private Button removeLabelButton;
+    private Button updateButton;
+
+    private Diagram diagram;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -46,17 +43,25 @@ public class ExperimenterApp extends Application {
         rootPane.setRight(propertyPage);
         propertyPage.setContent(setupPropertyPageContents());
 
-        Diagram diagram = new Diagram();
+        diagram = new Diagram();
         rootPane.setCenter(diagram);
 
         //TODO: Add children
         DiagramItem rectangle = new Rectangle("rect_1", 200, 100);
-        rectangle.relocate(50, 200);
+        rectangle.setText("Rectangle");
+        rectangle.relocate(50, 70);
         DiagramItem circle = new Circle("circle_1", 200);
-        circle.relocate(300, 300);
+        circle.setText("Circle");
+        circle.relocate(400, 300);
         DiagramItem ellipse = new Ellipse("ellipse_1", 200, 100);
+        ellipse.setText("Ellipse");
         ellipse.relocate(400, 100);
-//        DiagramItem item = new Label("label_1", 200, 100);
+        DiagramItem triangle = new Triangle("triangle_1", 200, 150);
+        triangle.setText("Triangle");
+        triangle.relocate(50, 300);
+        DiagramItem label = new com.robertbalazsi.systemmodeler.diagram.Label("label_1", 150, 80);
+        label.setText("Label");
+        label.relocate(50, 450);
 
         Scene scene = new Scene(rootPane, 900, 600);
 
@@ -67,23 +72,51 @@ public class ExperimenterApp extends Application {
         diagram.addItem(rectangle);
         diagram.addItem(circle);
         diagram.addItem(ellipse);
+        diagram.addItem(triangle);
+        diagram.addItem(label);
 
         stage.show();
     }
 
     private Node setupPropertyPageContents() {
         VBox pane = new VBox();
-        showLabelCheckBox = new CheckBox("Show label");
-        pane.getChildren().add(showLabelCheckBox);
+        removeLabelButton = new Button("Remove label");
+        pane.getChildren().add(removeLabelButton);
+        pane.getChildren().add(separator());
+        pane.getChildren().add(new Label("Text: "));
+        itemTextField = new TextField();
+        pane.getChildren().add(itemTextField);
         pane.getChildren().add(separator());
         pane.getChildren().add(new Label("Font size: "));
         fontSizeTextField = new TextField();
         pane.getChildren().add(fontSizeTextField);
         pane.getChildren().add(separator());
         pane.getChildren().add(new Label("Font color: "));
-        fontColorComboBox = new ComboBox<>(FXCollections.observableArrayList("Red", "Blue"));
+        fontColorComboBox = new ComboBox<>(FXCollections.observableArrayList("Red", "Green", "Blue", "Yellow"));
         pane.getChildren().add(fontColorComboBox);
         pane.getChildren().add(separator());
+        updateButton = new Button("Update");
+        pane.getChildren().add(updateButton);
+
+        removeLabelButton.setOnAction(event -> {
+            diagram.getSelectedItems().forEach(item -> item.setText(null));
+        });
+        itemTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            diagram.getSelectedItems().forEach(item -> {
+                item.setText(newValue);
+            });
+        });
+        fontSizeTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            diagram.getSelectedItems().forEach(item -> {
+                Font currentFont = item.getFont();
+                item.setFont(new Font(currentFont.getName(), Long.parseLong(newValue)));
+            });
+        });
+        fontColorComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            diagram.getSelectedItems().forEach(item -> {
+                item.setTextFill(Color.valueOf((String)newValue));
+            });
+        });
 
         return pane;
     }
