@@ -64,6 +64,13 @@ public class Diagram extends Pane {
         });
     }
 
+    public void addItem(DiagramItem item) {
+        installItemEventHandlers(item);
+        getChildren().add(item);
+    }
+
+    //TODO: removeItem() to uninstall event handlers
+
     public void select(DiagramItem item) {
         item.setSelected(true);
         selectedItems.add(item);
@@ -113,10 +120,8 @@ public class Diagram extends Pane {
             if (dragboard.hasString()) {
                 DiagramItem item = PaletteItemRegistry.getItem(dragboard.getString());
                 if (item != null) {
-                    installItemEventHandlers(item);
+                    addItem(item);
                     item.relocate(event.getX(), event.getY());
-
-                    getChildren().add(item);
                     success = true;
                 }
             }

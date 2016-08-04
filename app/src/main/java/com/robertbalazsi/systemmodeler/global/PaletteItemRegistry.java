@@ -29,8 +29,6 @@ public class PaletteItemRegistry {
             return new RoundedRectangle(nextId, 200, 100, 15, 15);
         } else if (TRIANGLE.equals(name)) {
             return new Triangle(nextId, 200, 100);
-        } else if (LABEL.equals(name)) {
-            return new Label(nextId, 200, 100);
         }
         throw new IllegalArgumentException(String.format("Shape '%s' not found in the registry.", name));
     }
