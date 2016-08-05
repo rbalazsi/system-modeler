@@ -25,6 +25,7 @@ import java.util.List;
  */
 public abstract class DiagramItem extends Canvas {
     public static final double DEFAULT_PADDING = 3;
+    public static final double DEFAULT_TEXT_PADDING = 20;
     public static final TextAlignment DEFAULT_TEXT_ALIGN = TextAlignment.CENTER;
     public static final VPos DEFAULT_TEXT_BASELINE = VPos.CENTER;
     public static final Paint DEFAULT_FILL = Color.BLACK;
@@ -148,6 +149,20 @@ public abstract class DiagramItem extends Canvas {
         this.textFill.set(textFill);
     }
 
+    private DoubleProperty textPadding = new SimpleDoubleProperty(this, "textPadding", DEFAULT_TEXT_PADDING);
+
+    public final DoubleProperty textPaddingProperty() {
+        return textPadding;
+    }
+
+    public final double getTextPadding() {
+        return textPadding.get();
+    }
+
+    public final void setTextPadding(double textPadding) {
+        this.textPadding.set(textPadding);
+    }
+
     /**
      * A hook method for supporting items that always maintain their aspect ratio when resizing (for example, Circles)
      * @return True, if the item always maintains its aspect ratio, false otherwise.
@@ -179,12 +194,7 @@ public abstract class DiagramItem extends Canvas {
             redraw();
         });
         this.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                drawSelectionBox();
-                controlPoints.forEach(ControlPoint::deselect);
-            } else {
-                redraw();
-            }
+            redraw();
         });
         this.paddingProperty().addListener(listener -> {
             redraw();
@@ -193,22 +203,29 @@ public abstract class DiagramItem extends Canvas {
             redraw();
         });
         this.fontProperty().addListener((observable, oldValue, newValue) -> {
+            // We create a throw away Text node so JavaFX would calculate the pixel width/height of our text in the new font
             Text text = new Text(this.getText());
             text.setFont(newValue);
             Bounds bounds = text.getLayoutBounds();
-            if (bounds.getWidth() > this.getWidth() || bounds.getHeight() > this.getHeight()) {
-                if (bounds.getWidth() > this.getWidth()) {
-                    setTranslateX((this.getWidth() - bounds.getWidth()) / 2);
-                    setWidth(bounds.getWidth());
+            double origTranslateX = this.getTranslateX();
+            double origTranslateY = this.getTranslateY();
+
+            if (bounds.getWidth() > this.getWidth() - 2*getTextPadding() ||
+                    bounds.getHeight() > this.getHeight() - 2*getTextPadding()) {
+                if (bounds.getWidth() > this.getWidth() - 2*getTextPadding()) {
+                    double deltaX = (this.getWidth() - (bounds.getWidth() + 2*getTextPadding())) / 2;
+                    setTranslateX(origTranslateX + deltaX);
+                    setWidth(bounds.getWidth()+ 2*getTextPadding());
                     if (alwaysMaintainsAspectRatio()) {
-                        //TODO: fix - also update translateY
+                        setTranslateY(origTranslateY + deltaX);
                         setHeight(getWidth());
                     }
                 } else {
-                    setTranslateY((this.getHeight() - bounds.getHeight()) / 2);
-                    setHeight(bounds.getHeight());
+                    double deltaY = (this.getHeight() - (bounds.getHeight() + 2*getTextPadding())) / 2;
+                    setTranslateY(origTranslateY + deltaY);
+                    setHeight(bounds.getHeight() + 2*getTextPadding());
                     if (alwaysMaintainsAspectRatio()) {
-                        //TODO: fix - also update translateX
+                        setTranslateX(origTranslateX + deltaY);
                         setWidth(getHeight());
                     }
                 }
@@ -225,6 +242,9 @@ public abstract class DiagramItem extends Canvas {
         this.textFillProperty().addListener(listener -> {
             redraw();
         });
+        this.textPaddingProperty().addListener(listener -> {
+            redraw();
+        });
 
         this.setOnMouseClicked(event -> {
             if (isMoving) {
@@ -232,7 +252,7 @@ public abstract class DiagramItem extends Canvas {
             } else if (isResizing) {
                 isResizing = false;
             } else if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2){
-                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DOUBLE_CLICKED, event));
+                fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.TEXT_EDITING, event));
             } else {
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.SELECTED, event));
             }
@@ -274,21 +294,12 @@ public abstract class DiagramItem extends Canvas {
         this.setOnMouseDragged(event -> {
             if (selectedControlPoint != null) {
                 isResizing = true;
-                controlPoints.forEach(point -> {
-                    point.clear();
-                    point.refreshBounds();
-                });
-
                 if (!this.alwaysMaintainsAspectRatio()) {
                     selectedControlPoint.setMoveConstrained(event.isControlDown());
                 }
 
                 selectedControlPoint.receiveMouseDragged(event);
-                clear();
-                draw();
-                drawSelectionBox();
-
-                controlPoints.forEach(ControlPoint::deselect);
+                redraw();
                 selectedControlPoint.select();
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZING, event));
             } else {
@@ -329,6 +340,14 @@ public abstract class DiagramItem extends Canvas {
         if (!StringUtils.isEmpty(getText())) {
             drawText();
         }
+        if (isSelected()) {
+            drawSelectionBox();
+            controlPoints.forEach(point -> {
+                point.clear();
+                point.refreshBounds();
+                point.deselect();
+            });
+        }
     }
 
     private void drawText() {
@@ -339,7 +358,7 @@ public abstract class DiagramItem extends Canvas {
         gc.setFill(getTextFill());
 
         //TODO: calculate the coords for different alignments
-        gc.fillText(getText(), getWidth() / 2, getHeight() / 2);
+        gc.fillText(getText(), getWidth() / 2, getHeight() / 2 );
         gc.save();
     }
 

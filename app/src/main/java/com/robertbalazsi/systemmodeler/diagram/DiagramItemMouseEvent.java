@@ -17,7 +17,7 @@ public class DiagramItemMouseEvent extends Event {
     public static EventType<DiagramItemMouseEvent> RESIZE_STARTED = new EventType<>(Event.ANY, "RESIZE_STARTED");
     public static EventType<DiagramItemMouseEvent> RESIZING = new EventType<>(Event.ANY, "RESIZING");
     public static EventType<DiagramItemMouseEvent> RESIZE_FINISHED = new EventType<>(Event.ANY, "RESIZE_FINISHED");
-    public static EventType<DiagramItemMouseEvent> DOUBLE_CLICKED = new EventType<>(Event.ANY, "DOUBLE_CLICKED");
+    public static EventType<DiagramItemMouseEvent> TEXT_EDITING = new EventType<>(Event.ANY, "TEXT_EDITING");
 
     @Getter
     private MouseEvent mouseEvent;
