@@ -2,8 +2,8 @@
  - label FX string property
  - double click triggers EDITING diagram item event
  - parent Diagram display a text box in which user enters text
- - pressing ENTER triggers new line
- - clicking away saves the label
+ - pressing ENTER saves the label
+ - pressing ESCAPE or clicking away cancels the editing, item text remains the same
  - expose styling as properties: Hor. , Vert. alignment, font size and color
  - !! reuse Label diagram item? standalone and attached to other item?
  - if font size is too big, recalculate width, resize parent but maintain its shape with same size (additional padding from width is calculated)

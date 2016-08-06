@@ -4,6 +4,7 @@ import com.robertbalazsi.systemmodeler.diagram.*;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -12,6 +13,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 /**
@@ -26,6 +28,8 @@ public class ExperimenterApp extends Application {
     private TextField fontSizeTextField;
     private TextField itemTextField;
     private ComboBox fontColorComboBox;
+    private ComboBox textAlignmentComboBox;
+    private ComboBox textBaselineComboBox;
     private Button updateButton;
 
     private Diagram diagram;
@@ -46,13 +50,13 @@ public class ExperimenterApp extends Application {
         propertyPage.setContent(setupPropertyPageContents());
 
         //TODO: Add children
-//        DiagramItem rectangle = new Rectangle("rect_1", 200, 100);
-//        rectangle.setText("Rectangle");
-//        rectangle.relocate(250, 250);
-//        rectangle.relocate(50, 70);
+        DiagramItem rectangle = new Rectangle("rect_1", 200, 100);
+        rectangle.setText("Rectangle");
+        rectangle.setFont(new Font(30));
+        rectangle.relocate(50, 100);
         DiagramItem circle = new Circle("circle_1", 200);
         circle.setText("Circle");
-        circle.relocate(250, 250);
+        circle.relocate(350, 100);
 //        DiagramItem ellipse = new Ellipse("ellipse_1", 200, 100);
 //        ellipse.setText("Ellipse");
 //        ellipse.relocate(400, 100);
@@ -69,7 +73,7 @@ public class ExperimenterApp extends Application {
         stage.setScene(scene);
         stage.setMaximized(false);
 
-//        diagram.addItem(rectangle);
+        diagram.addItem(rectangle);
         diagram.addItem(circle);
 //        diagram.addItem(ellipse);
 //        diagram.addItem(triangle);
@@ -92,19 +96,30 @@ public class ExperimenterApp extends Application {
         fontColorComboBox = new ComboBox<>(FXCollections.observableArrayList("Red", "Green", "Blue", "Yellow"));
         pane.getChildren().add(fontColorComboBox);
         pane.getChildren().add(separator());
+        pane.getChildren().add(new Label("Text alignment: "));
+        textAlignmentComboBox = new ComboBox<>(FXCollections.observableArrayList("Left", "Center", "Right", "Justify"));
+        pane.getChildren().add(textAlignmentComboBox);
+        pane.getChildren().add(separator());
+        pane.getChildren().add(new Label("Text baseline: "));
+        textBaselineComboBox = new ComboBox<>(FXCollections.observableArrayList("Top", "Center", "Baseline", "Bottom"));
+        pane.getChildren().add(textBaselineComboBox);
+        pane.getChildren().add(separator());
         updateButton = new Button("Update");
         pane.getChildren().add(updateButton);
 
-        updateButton.setOnAction(event -> {
-            diagram.getSelectedItems().forEach(item -> {
-                item.setText(itemTextField.getText());
+        updateButton.setOnAction(event -> diagram.getSelectedItems().forEach(item -> {
+//            item.setText(itemTextField.getText());
 
-                Font currentFont = item.getFont();
-                item.setFont(new Font(currentFont.getName(), Long.parseLong(fontSizeTextField.getText())));
+            Font currentFont = item.getFont();
+            item.setFont(new Font(currentFont.getName(), Long.parseLong(fontSizeTextField.getText())));
 
-                item.setTextFill(Color.valueOf((String)fontColorComboBox.getValue()));
-            });
-        });
+//            item.setTextFill(Color.valueOf((String)fontColorComboBox.getValue()));
+        }));
+
+        textAlignmentComboBox.setOnAction(event -> diagram.getSelectedItems().forEach(
+                item -> item.setTextAlign(TextAlignment.valueOf(((String)textAlignmentComboBox.getValue()).toUpperCase()))));
+        textBaselineComboBox.setOnAction(event -> diagram.getSelectedItems().forEach(
+                item -> item.setTextBaseline(VPos.valueOf(((String)textBaselineComboBox.getValue()).toUpperCase()))));
 
         return pane;
     }

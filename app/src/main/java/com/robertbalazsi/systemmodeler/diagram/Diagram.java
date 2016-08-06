@@ -9,6 +9,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.TextField;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
  */
 public class Diagram extends Pane {
 
+    private static TextField itemTextEditor = new TextField();
+
     private SetProperty<DiagramItem> selectedItems = new SimpleSetProperty<>(this, "selectedItems", FXCollections.observableSet());
 
     public SetProperty<DiagramItem> selectedItemsProperty() {
@@ -37,6 +40,7 @@ public class Diagram extends Pane {
     private Map<DiagramItem, InitialState> initialStateMap = new HashMap<>();
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
+    private boolean isItemEditing = false;
     private double rubberBandInitX, rubberBandInitY;
     private Rectangle rubberBandRect;
 
@@ -59,6 +63,10 @@ public class Diagram extends Pane {
             // We clean the selection if the mouse pointer wasn't in any of the items' bounds.
             if (!mousePointerInAnyCanvasItem(event.getX(), event.getY())) {
                 clearSelection();
+            }
+            if (isItemEditing) {
+                getChildren().remove(itemTextEditor);
+                isItemEditing = false;
             }
             event.consume();
         });
@@ -193,6 +201,24 @@ public class Diagram extends Pane {
             initialStateMap.clear();
             event.consume();
         });
+        item.addEventHandler(DiagramItemMouseEvent.TEXT_EDITING, event -> {
+            isItemEditing = true;
+            itemTextEditor.setOnAction(actionEvent -> {
+                String enteredText = itemTextEditor.getText();
+                getChildren().remove(itemTextEditor);
+                item.setText(enteredText);
+                isItemEditing = false;
+            });
+            itemTextEditor.setOnKeyPressed(keyEvent -> {
+                if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                    getChildren().remove(itemTextEditor);
+                    isItemEditing = false;
+                }
+            });
+            itemTextEditor.relocate(item.getLayoutX()+item.getWidth()/2, item.getLayoutY()+item.getHeight()/2);
+            getChildren().add(itemTextEditor);
+            itemTextEditor.requestFocus();
+        });
     }
 
     private void setupRubberBandSelection() {
@@ -268,7 +294,7 @@ public class Diagram extends Pane {
         private final double initTranslateX;
         private final double initTranslateY;
 
-        public InitialState(final double initMouseX, final double initMouseY, final double initTranslateX, final double initTranslateY) {
+        InitialState(final double initMouseX, final double initMouseY, final double initTranslateX, final double initTranslateY) {
             this.initMouseX = initMouseX;
             this.initMouseY = initMouseY;
             this.initTranslateX = initTranslateX;

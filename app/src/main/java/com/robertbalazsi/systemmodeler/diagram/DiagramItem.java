@@ -25,7 +25,7 @@ import java.util.List;
  */
 public abstract class DiagramItem extends Canvas {
     public static final double DEFAULT_PADDING = 3;
-    public static final double DEFAULT_TEXT_PADDING = 20;
+    public static final double DEFAULT_TEXT_PADDING = 10;
     public static final TextAlignment DEFAULT_TEXT_ALIGN = TextAlignment.CENTER;
     public static final VPos DEFAULT_TEXT_BASELINE = VPos.CENTER;
     public static final Paint DEFAULT_FILL = Color.BLACK;
@@ -220,7 +220,8 @@ public abstract class DiagramItem extends Canvas {
                         setTranslateY(origTranslateY + deltaX);
                         setHeight(getWidth());
                     }
-                } else {
+                }
+                if (bounds.getHeight() > this.getHeight() - 2*getTextPadding()) {
                     double deltaY = (this.getHeight() - (bounds.getHeight() + 2*getTextPadding())) / 2;
                     setTranslateY(origTranslateY + deltaY);
                     setHeight(bounds.getHeight() + 2*getTextPadding());
@@ -343,7 +344,6 @@ public abstract class DiagramItem extends Canvas {
         if (isSelected()) {
             drawSelectionBox();
             controlPoints.forEach(point -> {
-                point.clear();
                 point.refreshBounds();
                 point.deselect();
             });
@@ -356,10 +356,34 @@ public abstract class DiagramItem extends Canvas {
         gc.setTextBaseline(getTextBaseline());
         gc.setFont(getFont());
         gc.setFill(getTextFill());
-
-        //TODO: calculate the coords for different alignments
-        gc.fillText(getText(), getWidth() / 2, getHeight() / 2 );
+        gc.fillText(getText(), itemAlignmentToX(this), itemBaselineToY(this) );
         gc.save();
+    }
+
+    private static double itemAlignmentToX(DiagramItem item) {
+        TextAlignment align = item.getTextAlign();
+        switch (align) {
+            case CENTER:
+                return item.getWidth() / 2;
+            case RIGHT:
+                return item.getWidth() - item.getTextPadding();
+            default: /*LEFT, JUSTIFY*/
+                return item.getTextPadding();
+        }
+    }
+
+    private static double itemBaselineToY(DiagramItem item) {
+        VPos baseline = item.getTextBaseline();
+        switch (baseline) {
+            case TOP:
+                return item.getTextPadding();
+            case CENTER:
+                return item.getHeight() / 2;
+            case BOTTOM:
+                return item.getHeight() - item.getTextPadding();
+            default: /*BASELINE*/ //TODO currently same as top, review if it's worth to support it
+                return item.getTextPadding();
+        }
     }
 
     private void drawSelectionBox() {
