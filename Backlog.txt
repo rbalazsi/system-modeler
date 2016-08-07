@@ -1,0 +1,34 @@
+1. Copy/Paste and Delete functionality
+ - install right-click context menu on diagram items
+    -> Copy, if there are selected items but clipboard is empty (copies all selected)
+    -> Delete
+ - install right-click context menu on diagram
+    -> Copy, if there are selected items but clipboard is empty (copies all selected)
+    -> Paste, if items were copied on clipboard, otherwise disabled
+    -> Delete x selected, if there are selected items (x replaced with nr. selected items), otherwise disabled
+ - add items to Edit menu with the same behavior as in diagram right-click context menu
+ - paste will duplicate the selected items and place them at cursor position
+    -> copies maintain the positional relationships of selected items
+    -> selects the newly pasted items
+ - shortcuts: Ctrl-C for copy, Ctrl-V for paste, DELETE for delete
+ - Shift Copy:
+    -> when items are selected, holding down Shift and dragging the mouse will duplicate the selected items
+    -> only if Shift is still down on mouse released event, otherwise items will only be moved
+    -> copies maintain the positional relationships of selected items
+
+2. Vector graphics
+ - define a custom control point
+ - moving it modifies the bounded box of the parent item
+     => need to recalculate and resize parent accordingly
+ - parent item decides what to do with them
+     => most probably they will form paths of some shape to draw
+
+3. Arrows (REQUIRES Vector graphics)
+ - another category of items
+ - control points define the ends, they can be moved freely
+ - expose a thickness property
+ - other control points can also be added to make it free-form (not necessarily a straight line)
+ - ?? curve-based arrows (bezier curves)?
+ - can link two items together
+    => if item moves/resizes, they need to be updated/redrawn as well
+ - multiple arrow styles (see MS Visio for ideas)

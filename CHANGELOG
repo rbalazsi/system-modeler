@@ -1,2 +1,16 @@
 # Configured Gradle plugin
 	https://github.com/FibreFoX/javafx-gradle-plugin
+
+TODO write up the changelog from previous commits
+
+# 08-04-2016 Implemented labeling of items
+ - 'text' exposed as string property
+ - double click triggers EDITING diagram item event
+ - parent Diagram displays a text box in which user enters text
+ - pressing ENTER saves the label
+ - pressing ESCAPE cancels the editing, item text remains the same
+ - exposed styling as properties: font, text fill, alignment, baseline
+ - created a Label diagram item, having only text, but no additional drawing
+
+ISSUES:
+ - clicking away when text box is shown does not close it, ENTER/ESCAPE needs to be pressed for that
