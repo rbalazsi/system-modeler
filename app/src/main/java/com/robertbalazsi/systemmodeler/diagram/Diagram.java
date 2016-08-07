@@ -9,6 +9,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
@@ -78,6 +80,10 @@ public class Diagram extends Pane {
     }
 
     //TODO: removeItem() to uninstall event handlers
+    public void removeItem(DiagramItem item) {
+        selectedItems.remove(item);
+        getChildren().remove(item);
+    }
 
     public void select(DiagramItem item) {
         item.setSelected(true);
@@ -219,6 +225,23 @@ public class Diagram extends Pane {
             getChildren().add(itemTextEditor);
             itemTextEditor.requestFocus();
         });
+        item.addEventHandler(DiagramItemMouseEvent.CONTEXT_MENU, event -> {
+            ContextMenu contextMenu = new ContextMenu();
+            contextMenu.getItems().add(new MenuItem("Copy"));
+            contextMenu.getItems().add(deleteMenuItem(item));
+            MouseEvent mouseEvent = event.getMouseEvent();
+            //TODO: BUG - multiple right click causes multiple shows, exception - extract the menu as field, hide it first
+            contextMenu.show(item, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+            event.consume();
+        });
+    }
+
+    private MenuItem deleteMenuItem(DiagramItem item) {
+        MenuItem delete = new MenuItem("Delete");
+        delete.setOnAction(event -> {
+            removeItem(item);
+        });
+        return delete;
     }
 
     private void setupRubberBandSelection() {

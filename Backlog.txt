@@ -1,6 +1,6 @@
 1. Copy/Paste and Delete functionality
  - install right-click context menu on diagram items
-    -> Copy, if there are selected items but clipboard is empty (copies all selected)
+    -> Copy, if there are selected items (copies all selected)
     -> Delete
  - install right-click context menu on diagram
     -> Copy, if there are selected items but clipboard is empty (copies all selected)
