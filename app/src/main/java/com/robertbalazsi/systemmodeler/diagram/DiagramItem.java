@@ -429,4 +429,9 @@ public abstract class DiagramItem extends Canvas {
         }
         return null;
     }
+
+    // TODO: implement copy() - crate a new object, set its fields to the same values as current one
+    public DiagramItem copy() {
+        return null;
+    }
 }

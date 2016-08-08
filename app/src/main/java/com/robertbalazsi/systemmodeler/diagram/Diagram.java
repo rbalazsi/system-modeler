@@ -1,5 +1,7 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
+import com.google.common.collect.Sets;
+import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleSetProperty;
@@ -19,8 +21,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class Diagram extends Pane {
 
     private static TextField itemTextEditor = new TextField();
+    private static ContextMenu contextMenu = new ContextMenu();
 
     private SetProperty<DiagramItem> selectedItems = new SimpleSetProperty<>(this, "selectedItems", FXCollections.observableSet());
 
@@ -62,13 +64,24 @@ public class Diagram extends Pane {
         setupRubberBandSelection();
 
         this.setOnMouseClicked(event -> {
-            // We clean the selection if the mouse pointer wasn't in any of the items' bounds.
-            if (!mousePointerInAnyCanvasItem(event.getX(), event.getY())) {
-                clearSelection();
-            }
-            if (isItemEditing) {
-                getChildren().remove(itemTextEditor);
-                isItemEditing = false;
+            if (event.getButton() == MouseButton.SECONDARY) {
+                //TODO: refactor code, avoid duplicates
+                resetContextMenu();
+                if (!selectedItems.isEmpty()) {
+                    contextMenu.getItems().add(copyMenuItem(selectedItems));
+                    contextMenu.getItems().add(deleteMenuItem(selectedItems));
+                }
+                contextMenu.show(this, event.getScreenX(), event.getScreenY());
+                event.consume();
+            } else {
+                // We clean the selection if the mouse pointer wasn't in any of the items' bounds.
+                if (!mousePointerInAnyCanvasItem(event.getX(), event.getY())) {
+                    clearSelection();
+                }
+                if (isItemEditing) {
+                    getChildren().remove(itemTextEditor);
+                    isItemEditing = false;
+                }
             }
             event.consume();
         });
@@ -226,86 +239,146 @@ public class Diagram extends Pane {
             itemTextEditor.requestFocus();
         });
         item.addEventHandler(DiagramItemMouseEvent.CONTEXT_MENU, event -> {
-            ContextMenu contextMenu = new ContextMenu();
-            contextMenu.getItems().add(new MenuItem("Copy"));
-            contextMenu.getItems().add(deleteMenuItem(item));
+            resetContextMenu();
+            if (selectedItems.isEmpty()) {
+                contextMenu.getItems().add(copyMenuItem(Sets.newHashSet(item)));
+                contextMenu.getItems().add(deleteMenuItem(Sets.newHashSet(item)));
+            } else {
+                contextMenu.getItems().add(copyMenuItem(selectedItems));
+                contextMenu.getItems().add(deleteMenuItem(selectedItems));
+            }
             MouseEvent mouseEvent = event.getMouseEvent();
-            //TODO: BUG - multiple right click causes multiple shows, exception - extract the menu as field, hide it first
             contextMenu.show(item, mouseEvent.getScreenX(), mouseEvent.getScreenY());
             event.consume();
         });
     }
 
-    private MenuItem deleteMenuItem(DiagramItem item) {
+    private static void resetContextMenu() {
+        contextMenu.hide();
+        contextMenu.getItems().clear();
+    }
+
+    private MenuItem copyMenuItem(Set<DiagramItem> items) {
+        MenuItem copy = new MenuItem("Copy");
+        copy.setOnAction(event -> {
+            //TODO: review the data format; we don't want arbitrary strings to be copied from other apps
+            // Currently we separate the IDs of selected items with comma. This may be subject of refactoring for a more
+            // elaborate serialized format (e.g. XML)
+            StringJoiner joiner = new StringJoiner(",");
+            items.forEach(item -> joiner.add(item.getId()));
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            content.putString(joiner.toString());
+            clipboard.setContent(content);
+        });
+        return copy;
+    }
+
+    private MenuItem deleteMenuItem(Set<DiagramItem> items) {
         MenuItem delete = new MenuItem("Delete");
         delete.setOnAction(event -> {
-            removeItem(item);
+            Iterator<DiagramItem> itemsIter = items.iterator();
+            while (itemsIter.hasNext()) {
+                DiagramItem nextSelected = itemsIter.next();
+                itemsIter.remove();
+                getChildren().remove(nextSelected);
+            }
         });
         return delete;
     }
 
+    //TODO: continue implementing pasteMenuItem()
+    private MenuItem pasteMenuItem() {
+        MenuItem paste = new MenuItem("Paste");
+        paste.setOnAction(event -> {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            if (clipboard.hasString()) {
+                String[] ids = clipboard.getString().split(",");
+                // We paste the new item in the cursor position
+                if (ids.length == 1) {
+                    DiagramItem item = DiagramItemRegistry.getItem(ids[0]);
+                    if (item != null) {
+                        //TODO: continue
+                        DiagramItem itemCopy = item.copy();
+                    }
+                }
+                // We paste all items in their relative positions to the cursor
+                else {
+                    for (String id : ids) {
+                        //TODO: continue
+                    }
+                }
+            }
+        });
+        return paste;
+    }
+
     private void setupRubberBandSelection() {
         this.setOnMousePressed(event -> {
-            rubberBandSelect = true;
-            rubberBandInitX = event.getX();
-            rubberBandInitY = event.getY();
+            if (event.getButton() != MouseButton.SECONDARY) {
+                rubberBandSelect = true;
+                rubberBandInitX = event.getX();
+                rubberBandInitY = event.getY();
 
-            rubberBandRect = new Rectangle(rubberBandInitX, rubberBandInitY, 0, 0);
-            rubberBandRect.setStroke(Color.GRAY);
-            rubberBandRect.setStrokeWidth(0.5);
-            rubberBandRect.getStrokeDashArray().addAll(6.0);
-            rubberBandRect.setStrokeLineCap(StrokeLineCap.ROUND);
-            rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.3));
-            getChildren().add(rubberBandRect);
-
+                rubberBandRect = new Rectangle(rubberBandInitX, rubberBandInitY, 0, 0);
+                rubberBandRect.setStroke(Color.GRAY);
+                rubberBandRect.setStrokeWidth(0.5);
+                rubberBandRect.getStrokeDashArray().addAll(6.0);
+                rubberBandRect.setStrokeLineCap(StrokeLineCap.ROUND);
+                rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.3));
+                getChildren().add(rubberBandRect);
+            }
             event.consume();
         });
 
         this.setOnMouseDragged(event -> {
-            double offsetX = event.getX() - rubberBandInitX;
-            double offsetY = event.getY() - rubberBandInitY;
+            if (event.getButton() != MouseButton.SECONDARY) {
+                double offsetX = event.getX() - rubberBandInitX;
+                double offsetY = event.getY() - rubberBandInitY;
 
-            if (offsetX > 0) {
-                rubberBandRect.setWidth(offsetX);
-            } else {
-                rubberBandRect.setX(event.getX());
-                rubberBandRect.setWidth(rubberBandInitX - rubberBandRect.getX());
+                if (offsetX > 0) {
+                    rubberBandRect.setWidth(offsetX);
+                } else {
+                    rubberBandRect.setX(event.getX());
+                    rubberBandRect.setWidth(rubberBandInitX - rubberBandRect.getX());
+                }
+
+                if (offsetY > 0) {
+                    rubberBandRect.setHeight(offsetY);
+                } else {
+                    rubberBandRect.setY(event.getY());
+                    rubberBandRect.setHeight(rubberBandInitY - rubberBandRect.getY());
+                }
             }
-
-            if (offsetY > 0) {
-                rubberBandRect.setHeight(offsetY);
-            } else {
-                rubberBandRect.setY(event.getY());
-                rubberBandRect.setHeight(rubberBandInitY - rubberBandRect.getY());
-            }
-
             event.consume();
         });
 
         this.setOnMouseReleased(event -> {
-            if (rubberBandSelect) {
-                if( !event.isShiftDown() && !event.isControlDown()) {
-                    clearSelection();
-                }
-                for (Node item : getChildren().stream().filter(node -> node instanceof DiagramItem).collect(Collectors.toList())) {
-                    DiagramItem diagramItem = (DiagramItem)item;
-                    if (rubberBandRect.getBoundsInParent().contains(diagramItem.getBoundsInParent())) {
-                        if (event.isShiftDown()) {
-                            select(diagramItem);
-                        } else if (event.isControlDown()) {
-                            if (isSelected(diagramItem)) {
-                                deselect(diagramItem);
+            if (event.getButton() != MouseButton.SECONDARY) {
+                if (rubberBandSelect) {
+                    if (!event.isShiftDown() && !event.isControlDown()) {
+                        clearSelection();
+                    }
+                    for (Node item : getChildren().stream().filter(node -> node instanceof DiagramItem).collect(Collectors.toList())) {
+                        DiagramItem diagramItem = (DiagramItem) item;
+                        if (rubberBandRect.getBoundsInParent().contains(diagramItem.getBoundsInParent())) {
+                            if (event.isShiftDown()) {
+                                select(diagramItem);
+                            } else if (event.isControlDown()) {
+                                if (isSelected(diagramItem)) {
+                                    deselect(diagramItem);
+                                } else {
+                                    select(diagramItem);
+                                }
                             } else {
                                 select(diagramItem);
                             }
-                        } else {
-                            select(diagramItem);
                         }
                     }
+                    getChildren().remove(rubberBandRect);
+                    rubberBandRect = null;
+                    rubberBandSelect = false;
                 }
-                getChildren().remove(rubberBandRect);
-                rubberBandRect = null;
-                rubberBandSelect = false;
             }
             event.consume();
         });
@@ -322,6 +395,16 @@ public class Diagram extends Pane {
             this.initMouseY = initMouseY;
             this.initTranslateX = initTranslateX;
             this.initTranslateY = initTranslateY;
+        }
+    }
+
+    private static class ItemCoord {
+        private final double x;
+        private final double y;
+
+        ItemCoord(double x, double y) {
+            this.x = x;
+            this.y = y;
         }
     }
 }
