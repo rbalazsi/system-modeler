@@ -54,7 +54,7 @@ public class ExperimenterApp extends Application {
         rectangle.setText("Rectangle");
         rectangle.setFont(new Font(30));
         rectangle.relocate(50, 100);
-        DiagramItem circle = new Circle(null, 200);
+        DiagramItem circle = new Circle(200);
         circle.setText("Circle");
         circle.relocate(350, 100);
 //        DiagramItem ellipse = new Ellipse(200, 100);
