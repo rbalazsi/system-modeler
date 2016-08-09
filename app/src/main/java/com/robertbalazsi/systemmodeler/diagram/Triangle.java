@@ -14,8 +14,8 @@ import java.util.Collection;
  */
 public class Triangle extends DiagramItem {
 
-    public Triangle(String id, double width, double height) {
-        super(id, width, height);
+    public Triangle(double width, double height) {
+        super(width, height);
         draw();
     }
 
@@ -49,5 +49,12 @@ public class Triangle extends DiagramItem {
         gc.fill();
         gc.applyEffect(new DropShadow(2.0, 3.0, 3.0, Color.GREY));
         gc.save();
+    }
+
+    @Override
+    public DiagramItem copy() {
+        Triangle triangle = new Triangle(getWidth(), getHeight());
+        baseCopy(this, triangle);
+        return triangle;
     }
 }

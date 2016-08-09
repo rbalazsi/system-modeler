@@ -71,6 +71,9 @@ public class Diagram extends Pane {
                     contextMenu.getItems().add(copyMenuItem(selectedItems));
                     contextMenu.getItems().add(deleteMenuItem(selectedItems));
                 }
+                if (Clipboard.getSystemClipboard().hasString()) {
+                    contextMenu.getItems().add(pasteMenuItem(event));
+                }
                 contextMenu.show(this, event.getScreenX(), event.getScreenY());
                 event.consume();
             } else {
@@ -88,12 +91,14 @@ public class Diagram extends Pane {
     }
 
     public void addItem(DiagramItem item) {
+        DiagramItemRegistry.putItem(item);
         installItemEventHandlers(item);
         getChildren().add(item);
     }
 
     //TODO: removeItem() to uninstall event handlers
     public void removeItem(DiagramItem item) {
+        DiagramItemRegistry.removeItem(item.getId());
         selectedItems.remove(item);
         getChildren().remove(item);
     }
@@ -288,25 +293,24 @@ public class Diagram extends Pane {
     }
 
     //TODO: continue implementing pasteMenuItem()
-    private MenuItem pasteMenuItem() {
+    private MenuItem pasteMenuItem(MouseEvent event) {
         MenuItem paste = new MenuItem("Paste");
-        paste.setOnAction(event -> {
+        paste.setOnAction(actionEvent -> {
             Clipboard clipboard = Clipboard.getSystemClipboard();
-            if (clipboard.hasString()) {
-                String[] ids = clipboard.getString().split(",");
-                // We paste the new item in the cursor position
-                if (ids.length == 1) {
-                    DiagramItem item = DiagramItemRegistry.getItem(ids[0]);
-                    if (item != null) {
-                        //TODO: continue
-                        DiagramItem itemCopy = item.copy();
-                    }
+            String[] ids = clipboard.getString().split(",");
+            // We paste the new item in the cursor position
+            if (ids.length == 1) {
+                DiagramItem item = DiagramItemRegistry.getItem(ids[0]);
+                if (item != null) {
+                    DiagramItem itemCopy = item.copy();
+                    itemCopy.relocate(event.getSceneX(), event.getSceneY());
+                    addItem(itemCopy);
                 }
-                // We paste all items in their relative positions to the cursor
-                else {
-                    for (String id : ids) {
-                        //TODO: continue
-                    }
+            }
+            // We paste all items in their relative positions to the cursor
+            else {
+                for (String id : ids) {
+                    //TODO: continue
                 }
             }
         });

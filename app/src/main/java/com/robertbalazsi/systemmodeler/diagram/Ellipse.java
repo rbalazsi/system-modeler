@@ -14,8 +14,8 @@ import java.util.Collection;
  */
 public class Ellipse extends DiagramItem {
 
-    public Ellipse(String id, double width, double height) {
-        super(id, width, height);
+    public Ellipse(double width, double height) {
+        super(width, height);
         draw();
     }
 
@@ -43,5 +43,12 @@ public class Ellipse extends DiagramItem {
         gc.fillOval(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding());
         gc.applyEffect(new DropShadow(2.0, 3.0, 3.0, Color.GREY));
         gc.save();
+    }
+
+    @Override
+    public DiagramItem copy() {
+        Ellipse ellipse = new Ellipse(getWidth(), getHeight());
+        baseCopy(this, ellipse);
+        return ellipse;
     }
 }

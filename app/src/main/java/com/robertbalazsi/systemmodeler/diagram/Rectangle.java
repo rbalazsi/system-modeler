@@ -14,8 +14,8 @@ import java.util.Collection;
  */
 public class Rectangle extends DiagramItem {
 
-    public Rectangle(String id, double width, double height) {
-        super(id, width, height);
+    public Rectangle(double width, double height) {
+        super(width, height);
         draw();
     }
 
@@ -43,5 +43,12 @@ public class Rectangle extends DiagramItem {
         gc.fillRect(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding());
         gc.applyEffect(new DropShadow(2.0, 3.0, 3.0, Color.GREY));
         gc.save();
+    }
+
+    @Override
+    public DiagramItem copy() {
+        Rectangle rect = new Rectangle(getWidth(), getHeight());
+        baseCopy(this, rect);
+        return rect;
     }
 }

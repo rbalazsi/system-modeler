@@ -43,8 +43,8 @@ public class RoundedRectangle extends DiagramItem {
         this.arcHeight.set(arcHeight);
     }
 
-    public RoundedRectangle(String id, double width, double height, double arcWidth, double arcHeight) {
-        super(id, width, height);
+    public RoundedRectangle(double width, double height, double arcWidth, double arcHeight) {
+        super(width, height);
         setArcWidth(arcWidth);
         setArcHeight(arcHeight);
         draw();
@@ -76,5 +76,12 @@ public class RoundedRectangle extends DiagramItem {
         gc.fillRoundRect(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding(),
                 getArcWidth(), getArcHeight());
         gc.save();
+    }
+
+    @Override
+    public DiagramItem copy() {
+        RoundedRectangle roundedRect = new RoundedRectangle(getWidth(), getHeight(), getArcWidth(), getArcHeight());
+        baseCopy(this, roundedRect);
+        return roundedRect;
     }
 }

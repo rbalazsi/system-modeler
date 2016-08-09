@@ -50,20 +50,20 @@ public class ExperimenterApp extends Application {
         propertyPage.setContent(setupPropertyPageContents());
 
         //TODO: Add children
-        DiagramItem rectangle = new Rectangle("rect_1", 200, 100);
+        DiagramItem rectangle = new Rectangle(200, 100);
         rectangle.setText("Rectangle");
         rectangle.setFont(new Font(30));
         rectangle.relocate(50, 100);
-        DiagramItem circle = new Circle("circle_1", 200);
+        DiagramItem circle = new Circle(null, 200);
         circle.setText("Circle");
         circle.relocate(350, 100);
-//        DiagramItem ellipse = new Ellipse("ellipse_1", 200, 100);
+//        DiagramItem ellipse = new Ellipse(200, 100);
 //        ellipse.setText("Ellipse");
 //        ellipse.relocate(400, 100);
-//        DiagramItem triangle = new Triangle("triangle_1", 200, 150);
+//        DiagramItem triangle = new Triangle(200, 150);
 //        triangle.setText("Triangle");
 //        triangle.relocate(50, 300);
-//        DiagramItem label = new com.robertbalazsi.systemmodeler.diagram.Label("label_1", 150, 80);
+//        DiagramItem label = new com.robertbalazsi.systemmodeler.diagram.Label(150, 80);
 //        label.setText("Label");
 //        label.relocate(50, 450);
 

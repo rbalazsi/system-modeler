@@ -30,8 +30,8 @@ public class Circle extends DiagramItem {
         this.diameter.set(diameter);
     }
 
-    public Circle(String id, double diameter) {
-        super(id, diameter, diameter);
+    public Circle(double diameter) {
+        super(diameter, diameter);
         setDiameter(diameter);
         draw();
         this.diameter.addListener(listener -> {redraw();});
@@ -46,6 +46,13 @@ public class Circle extends DiagramItem {
                 new ControlPoint.Builder(this, Location.BOTTOM_LEFT).moveConstrained().build(),
                 new ControlPoint.Builder(this, Location.BOTTOM_RIGHT).moveConstrained().build()
         );
+    }
+
+    @Override
+    public DiagramItem copy() {
+        Circle circle = new Circle(getDiameter());
+        baseCopy(this, circle);
+        return circle;
     }
 
     @Override

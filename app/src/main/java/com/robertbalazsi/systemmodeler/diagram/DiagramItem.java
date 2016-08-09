@@ -163,6 +163,19 @@ public abstract class DiagramItem extends Canvas {
         this.textPadding.set(textPadding);
     }
 
+    //TODO: review this for performance; since draw() is done in subclass constructors, every setter will trigger redraw
+    public static void baseCopy(DiagramItem source, DiagramItem target) {
+        target.setWidth(source.getWidth());
+        target.setHeight(source.getHeight());
+        target.setFont(source.getFont());
+        target.setPadding(source.getPadding());
+        target.setText(source.getText());
+        target.setTextAlign(source.getTextAlign());
+        target.setTextBaseline(source.getTextBaseline());
+        target.setTextFill(source.getTextFill());
+        target.setTextPadding(source.getTextPadding());
+        target.setResizable(source.isResizable());
+    }
     /**
      * A hook method for supporting items that always maintain their aspect ratio when resizing (for example, Circles)
      * @return True, if the item always maintains its aspect ratio, false otherwise.
@@ -171,9 +184,8 @@ public abstract class DiagramItem extends Canvas {
         return false;
     }
 
-    public DiagramItem(String id, double width, double height) {
+    public DiagramItem(double width, double height) {
         super(width, height);
-        setId(id);
 
         if (isResizable()) {
             controlPoints.addAll(setupControlPoints());
@@ -335,18 +347,10 @@ public abstract class DiagramItem extends Canvas {
 
     protected abstract Collection<? extends ControlPoint> setupControlPoints();
 
-    @Override
-    public boolean equals(Object obj) {
-        return !(obj == null || !getClass().equals(obj.getClass())) &&
-                new EqualsBuilder().append(getId(), ((DiagramItem) obj).getId()).isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder().append(getId()).hashCode();
-    }
+    public abstract DiagramItem copy();
 
     protected abstract void draw();
+
 
     public final void redraw() {
         clear();
@@ -361,6 +365,17 @@ public abstract class DiagramItem extends Canvas {
                 point.deselect();
             });
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return !(obj == null || !getClass().equals(obj.getClass())) &&
+                new EqualsBuilder().append(getId(), ((DiagramItem) obj).getId()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(getId()).hashCode();
     }
 
     private void drawText() {
@@ -427,11 +442,6 @@ public abstract class DiagramItem extends Canvas {
                 return controlPoint;
             }
         }
-        return null;
-    }
-
-    // TODO: implement copy() - crate a new object, set its fields to the same values as current one
-    public DiagramItem copy() {
         return null;
     }
 }

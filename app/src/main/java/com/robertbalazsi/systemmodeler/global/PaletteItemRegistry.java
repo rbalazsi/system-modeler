@@ -14,21 +14,18 @@ public class PaletteItemRegistry {
     public static final String TRIANGLE = "Triangle";
     public static final String LABEL = "Label";
 
-    public static long itemCtr = 0;
-
     public static DiagramItem getItem(String name) {
         //TODO: make it polymorphic
-        String nextId = "item_" + (++itemCtr);
         if (RECTANGLE.equals(name)) {
-            return new Rectangle(nextId, 200, 100);
+            return new Rectangle(200, 100);
         } else if (CIRCLE.equals(name)) {
-            return new Circle(nextId, 100);
+            return new Circle(100);
         } else if (ELLIPSE.equals(name)) {
-            return new Ellipse(nextId, 200, 100);
+            return new Ellipse(200, 100);
         } else if (ROUNDED_RECTANGLE.equals(name)) {
-            return new RoundedRectangle(nextId, 200, 100, 15, 15);
+            return new RoundedRectangle(200, 100, 15, 15);
         } else if (TRIANGLE.equals(name)) {
-            return new Triangle(nextId, 200, 100);
+            return new Triangle(200, 100);
         }
         throw new IllegalArgumentException(String.format("Shape '%s' not found in the registry.", name));
     }

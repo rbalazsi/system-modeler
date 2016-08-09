@@ -10,8 +10,8 @@ import java.util.Collections;
  */
 public class Label extends DiagramItem {
 
-    public Label(String id, double width, double height) {
-        super(id, width, height);
+    public Label(double width, double height) {
+        super(width, height);
         draw();
     }
 
@@ -23,5 +23,12 @@ public class Label extends DiagramItem {
     @Override
     protected void draw() {
         /* empty */
+    }
+
+    @Override
+    public DiagramItem copy() {
+        Label label = new Label(getWidth(), getHeight());
+        baseCopy(this, label);
+        return label;
     }
 }

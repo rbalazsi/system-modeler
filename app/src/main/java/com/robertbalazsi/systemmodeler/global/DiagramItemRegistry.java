@@ -6,15 +6,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global registry of diagram items. They are stored in a map and can be retrieved by ID.
+ * Global registry of diagram items. IDs are generated for each item. Items are stored in a map and can be retrieved by ID.
  */
 public class DiagramItemRegistry {
     private static final Map<String, DiagramItem> itemsMap = new HashMap<>();
+    private static long idCtr = 0;
 
     public static void putItem(DiagramItem item) {
-        if (itemsMap.containsKey(item.getId())) {
-            throw new IllegalArgumentException(String.format("Cannot register item with the same id '%s'", item.getId()));
+        if (item.getId() != null) {
+            throw new IllegalArgumentException("IDs for items are automatically generated. They cannot be given explicitly.");
         }
+        item.setId("item_" + idCtr++);
         itemsMap.put(item.getId(), item);
     }
 
