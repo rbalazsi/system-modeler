@@ -30,6 +30,7 @@ public class Diagram extends Pane {
 
     private static TextField itemTextEditor = new TextField();
     private static ContextMenu contextMenu = new ContextMenu();
+    private static final String CLIPBOARD_ITEMS_PREFIX = "_items:";
 
     private SetProperty<DiagramItem> selectedItems = new SimpleSetProperty<>(this, "selectedItems", FXCollections.observableSet());
 
@@ -41,10 +42,12 @@ public class Diagram extends Pane {
         return selectedItems.get();
     }
     private Map<DiagramItem, InitialState> initialStateMap = new HashMap<>();
-    private Map<DiagramItem, ItemCoord> selectedItemsRelativeCursorPositions = new HashMap<>();
+    private Map<DiagramItem, ItemCoord> selectedItemsPositionDeltas = new HashMap<>();
+    private Set<DiagramItem> dragCopyItems = new HashSet<>();
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
     private boolean isItemEditing = false;
+    private boolean isDragCopying = false;
     private double rubberBandInitX, rubberBandInitY;
     private double mouseSceneX, mouseSceneY;
     private Rectangle rubberBandRect;
@@ -70,7 +73,7 @@ public class Diagram extends Pane {
                     contextMenu.getItems().add(copyMenuItem());
                     contextMenu.getItems().add(deleteMenuItem());
                 }
-                if (Clipboard.getSystemClipboard().hasString()) {
+                if (Clipboard.getSystemClipboard().hasString() && Clipboard.getSystemClipboard().getString().startsWith(CLIPBOARD_ITEMS_PREFIX)) {
                     contextMenu.getItems().add(pasteMenuItem());
                 }
                 contextMenu.show(this, event.getScreenX(), event.getScreenY());
@@ -222,7 +225,7 @@ public class Diagram extends Pane {
         item.addEventHandler(DiagramItemMouseEvent.MOVING, event -> {
             setCursor(Cursor.MOVE);
             MouseEvent mouseEvent = event.getMouseEvent();
-            if (!isMultiMove) {
+            if (!isMultiMove && !isDragCopying) {
                 InitialState initState = initialStateMap.get(item);
                 item.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
                 item.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
@@ -243,6 +246,54 @@ public class Diagram extends Pane {
             initialStateMap.clear();
             event.consume();
         });
+
+        //TODO: drag copy
+        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_STARTED, event -> {
+            if (selectedItems.isEmpty()) {
+                dragCopyItems.add(item.copy());
+            } else {
+                dragCopyItems.addAll(selectedItems.stream().map(DiagramItem::copy).collect(Collectors.toList()));
+            }
+            initialStateMap.clear();
+            MouseEvent mouseEvent = event.getMouseEvent();
+            dragCopyItems.forEach(copyItem -> {
+                DiagramItemRegistry.putItem(copyItem);
+                getChildren().add(copyItem);
+                initialStateMap.put(copyItem, new InitialState(
+                        mouseEvent.getSceneX(),
+                        mouseEvent.getSceneY(),
+                        copyItem.getTranslateX(),
+                        copyItem.getTranslateY()
+                ));
+            });
+            event.consume();
+        });
+        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPYING, event -> {
+            isDragCopying = true;
+            MouseEvent mouseEvent = event.getMouseEvent();
+            initialStateMap.entrySet().forEach(entry -> {
+                DiagramItem currentItem = entry.getKey();
+                InitialState initState = entry.getValue();
+
+                currentItem.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
+                currentItem.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
+            });
+
+            event.consume();
+        });
+        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_FINISHED, event -> {
+            isDragCopying = false;
+            dragCopyItems.forEach(this::installItemEventHandlers);
+            dragCopyItems.clear();
+            event.consume();
+        });
+        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event -> {
+            isDragCopying = false;
+            dragCopyItems.forEach(this::removeItem);
+            dragCopyItems.clear();
+            event.consume();
+        });
+
         item.addEventHandler(DiagramItemMouseEvent.TEXT_EDITING, event -> {
             isItemEditing = true;
             itemTextEditor.setOnAction(actionEvent -> {
@@ -285,19 +336,29 @@ public class Diagram extends Pane {
     }
 
     private void copyItems() {
-        //TODO: review the data format; we don't want arbitrary strings to be copied from other apps
-        // Currently we separate the IDs of selected items with comma. This may be subject of refactoring for a more
-        // elaborate serialized format (e.g. XML)
-        selectedItemsRelativeCursorPositions.clear();
+        selectedItemsPositionDeltas.clear();
         StringJoiner joiner = new StringJoiner(",");
-        selectedItems.forEach(item -> {
+
+        // We store the position difference of each selected item relative to the X coordinate of the leftmost item, resp.
+        // the Y coordinate of the topmost item.
+        double leftmostX = Double.MAX_VALUE, topmostY = Double.MAX_VALUE;
+        for (DiagramItem item : selectedItems) {
+            if (item.getLayoutX() < leftmostX) {
+                leftmostX = item.getLayoutX();
+            }
+            if (item.getLayoutY() < topmostY) {
+                topmostY = item.getLayoutY();
+            }
+        }
+
+        for (DiagramItem item : selectedItems) {
             joiner.add(item.getId());
-            selectedItemsRelativeCursorPositions.put(item, new ItemCoord(mouseSceneX - item.getLayoutX(),
-                    mouseSceneY - item.getLayoutY()));
-        });
+            selectedItemsPositionDeltas.put(item, new ItemCoord(item.getLayoutX() - leftmostX,
+                    item.getLayoutY() - topmostY));
+        }
         Clipboard clipboard = Clipboard.getSystemClipboard();
         ClipboardContent content = new ClipboardContent();
-        content.putString(joiner.toString());
+        content.putString(CLIPBOARD_ITEMS_PREFIX + joiner.toString());
         clipboard.setContent(content);
     }
 
@@ -324,24 +385,15 @@ public class Diagram extends Pane {
 
     private void pasteItems() {
         Clipboard clipboard = Clipboard.getSystemClipboard();
-        String[] ids = clipboard.getString().split(",");
-        // We paste the new item in the cursor position
-        if (ids.length == 1) {
-            DiagramItem item = DiagramItemRegistry.getItem(ids[0]);
-            DiagramItem itemCopy = item.copy();
-            itemCopy.relocate(mouseSceneX, mouseSceneY);
-            addItem(itemCopy);
-        }
-        // We paste all items in their relative positions to the cursor
-        else {
+        String contents = clipboard.getString();
+        String[] ids = contents.substring(CLIPBOARD_ITEMS_PREFIX.length(), contents.length()).split(",");
             for (String id : ids) {
                 DiagramItem item = DiagramItemRegistry.getItem(id);
                 DiagramItem itemCopy = item.copy();
-                ItemCoord delta = selectedItemsRelativeCursorPositions.get(item);
-                itemCopy.relocate(mouseSceneX - delta.x, mouseSceneY - delta.y);
+                ItemCoord delta = selectedItemsPositionDeltas.get(item);
+                itemCopy.relocate(mouseSceneX + delta.x, mouseSceneY + delta.y);
                 addItem(itemCopy);
             }
-        }
     }
 
     private void setupRubberBandSelection() {

@@ -17,6 +17,10 @@ public class DiagramItemMouseEvent extends Event {
     public static EventType<DiagramItemMouseEvent> RESIZE_STARTED = new EventType<>(Event.ANY, "RESIZE_STARTED");
     public static EventType<DiagramItemMouseEvent> RESIZING = new EventType<>(Event.ANY, "RESIZING");
     public static EventType<DiagramItemMouseEvent> RESIZE_FINISHED = new EventType<>(Event.ANY, "RESIZE_FINISHED");
+    public static EventType<DiagramItemMouseEvent> DRAG_COPY_STARTED = new EventType<>(Event.ANY, "DRAG_COPY_STARTED");
+    public static EventType<DiagramItemMouseEvent> DRAG_COPYING = new EventType<>(Event.ANY, "DRAG_COPYING");
+    public static EventType<DiagramItemMouseEvent> DRAG_COPY_FINISHED = new EventType<>(Event.ANY, "DRAG_COPY_FINISHED");
+    public static EventType<DiagramItemMouseEvent> DRAG_COPY_CANCELLED = new EventType<>(Event.ANY, "DRAG_COPY_CANCELLED");
     public static EventType<DiagramItemMouseEvent> TEXT_EDITING = new EventType<>(Event.ANY, "TEXT_EDITING");
     public static EventType<DiagramItemMouseEvent> CONTEXT_MENU = new EventType<>(Event.ANY, "CONTEXT_MENU");
 

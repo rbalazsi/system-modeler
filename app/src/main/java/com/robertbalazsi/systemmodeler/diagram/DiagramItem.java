@@ -32,6 +32,7 @@ public abstract class DiagramItem extends Canvas {
 
     private boolean isMoving = false;
     private boolean isResizing = false;
+    private boolean isDragCopying = false;
     private List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
 
@@ -165,6 +166,8 @@ public abstract class DiagramItem extends Canvas {
 
     //TODO: review this for performance; since draw() is done in subclass constructors, every setter will trigger redraw
     public static void baseCopy(DiagramItem source, DiagramItem target) {
+        target.setLayoutX(source.getLayoutX());
+        target.setLayoutY(source.getLayoutY());
         target.setWidth(source.getWidth());
         target.setHeight(source.getHeight());
         target.setFont(source.getFont());
@@ -266,6 +269,8 @@ public abstract class DiagramItem extends Canvas {
                 isMoving = false;
             } else if (isResizing) {
                 isResizing = false;
+            } else if (isDragCopying) {
+                isDragCopying = false;
             } else if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2){
                 fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.TEXT_EDITING, event));
             } else {
@@ -306,6 +311,8 @@ public abstract class DiagramItem extends Canvas {
                 if (selectedControlPoint != null) {
                     selectedControlPoint.receiveMousePressed(event);
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZE_STARTED, event));
+                } else if (event.isShiftDown()) {
+                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_STARTED, event));
                 } else {
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVE_STARTED, event));
                 }
@@ -325,6 +332,12 @@ public abstract class DiagramItem extends Canvas {
                     redraw();
                     selectedControlPoint.select();
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZING, event));
+                } else if (isDragCopying && !event.isShiftDown()) {
+                    isDragCopying = false;
+                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event));
+                } else if (event.isShiftDown()) {
+                    isDragCopying = true;
+                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPYING, event));
                 } else {
                     isMoving = true;
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVING, event));
@@ -334,9 +347,15 @@ public abstract class DiagramItem extends Canvas {
         });
 
         this.setOnMouseReleased(event -> {
-            if (event.getButton() == MouseButton.PRIMARY) {
+                        if (event.getButton() == MouseButton.PRIMARY) {
                 if (isMoving) {
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVE_FINISHED, event));
+                } else if (isDragCopying && !event.isShiftDown()) {
+                    isDragCopying = false;
+                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event));
+                } else if (isDragCopying) {
+                    isDragCopying = false;
+                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_FINISHED, event));
                 } else {
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZE_FINISHED, event));
                 }
