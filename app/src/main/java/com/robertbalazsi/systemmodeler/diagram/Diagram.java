@@ -1,6 +1,5 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
-import com.google.common.collect.Sets;
 import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import javafx.beans.property.SetProperty;
@@ -42,10 +41,12 @@ public class Diagram extends Pane {
         return selectedItems.get();
     }
     private Map<DiagramItem, InitialState> initialStateMap = new HashMap<>();
+    private Map<DiagramItem, ItemCoord> selectedItemsRelativeCursorPositions = new HashMap<>();
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
     private boolean isItemEditing = false;
     private double rubberBandInitX, rubberBandInitY;
+    private double mouseSceneX, mouseSceneY;
     private Rectangle rubberBandRect;
 
     public Diagram() {
@@ -60,19 +61,17 @@ public class Diagram extends Pane {
         }
 
         setupDragDropHandlers();
-
         setupRubberBandSelection();
 
         this.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.SECONDARY) {
-                //TODO: refactor code, avoid duplicates
                 resetContextMenu();
                 if (!selectedItems.isEmpty()) {
-                    contextMenu.getItems().add(copyMenuItem(selectedItems));
-                    contextMenu.getItems().add(deleteMenuItem(selectedItems));
+                    contextMenu.getItems().add(copyMenuItem());
+                    contextMenu.getItems().add(deleteMenuItem());
                 }
                 if (Clipboard.getSystemClipboard().hasString()) {
-                    contextMenu.getItems().add(pasteMenuItem(event));
+                    contextMenu.getItems().add(pasteMenuItem());
                 }
                 contextMenu.show(this, event.getScreenX(), event.getScreenY());
                 event.consume();
@@ -85,6 +84,24 @@ public class Diagram extends Pane {
                     getChildren().remove(itemTextEditor);
                     isItemEditing = false;
                 }
+            }
+            event.consume();
+        });
+
+        // We are taking note of the mouse position in the scene for future events needing it.
+        this.setOnMouseMoved(event -> {
+            mouseSceneX = event.getSceneX();
+            mouseSceneY = event.getSceneY();
+            event.consume();
+        });
+
+        this.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                deleteItems(selectedItems);
+            } else if (event.isControlDown() && event.getCode() == KeyCode.C) {
+                copyItems();
+            } else if (event.isControlDown() && event.getCode() == KeyCode.V) {
+                pasteItems();
             }
             event.consume();
         });
@@ -105,6 +122,7 @@ public class Diagram extends Pane {
 
     public void select(DiagramItem item) {
         item.setSelected(true);
+        item.requestFocus();
         selectedItems.add(item);
     }
 
@@ -239,21 +257,18 @@ public class Diagram extends Pane {
                     isItemEditing = false;
                 }
             });
-            itemTextEditor.relocate(item.getLayoutX()+item.getWidth()/2, item.getLayoutY()+item.getHeight()/2);
+            itemTextEditor.relocate(item.getLayoutX() + item.getWidth() / 2, item.getLayoutY() + item.getHeight() / 2);
             getChildren().add(itemTextEditor);
             itemTextEditor.requestFocus();
         });
         item.addEventHandler(DiagramItemMouseEvent.CONTEXT_MENU, event -> {
             resetContextMenu();
-            if (selectedItems.isEmpty()) {
-                contextMenu.getItems().add(copyMenuItem(Sets.newHashSet(item)));
-                contextMenu.getItems().add(deleteMenuItem(Sets.newHashSet(item)));
-            } else {
-                contextMenu.getItems().add(copyMenuItem(selectedItems));
-                contextMenu.getItems().add(deleteMenuItem(selectedItems));
+            if (!selectedItems.isEmpty()) {
+                contextMenu.getItems().add(copyMenuItem());
+                contextMenu.getItems().add(deleteMenuItem());
+                MouseEvent mouseEvent = event.getMouseEvent();
+                contextMenu.show(item, mouseEvent.getScreenX(), mouseEvent.getScreenY());
             }
-            MouseEvent mouseEvent = event.getMouseEvent();
-            contextMenu.show(item, mouseEvent.getScreenX(), mouseEvent.getScreenY());
             event.consume();
         });
     }
@@ -263,58 +278,70 @@ public class Diagram extends Pane {
         contextMenu.getItems().clear();
     }
 
-    private MenuItem copyMenuItem(Set<DiagramItem> items) {
+    private MenuItem copyMenuItem() {
         MenuItem copy = new MenuItem("Copy");
-        copy.setOnAction(event -> {
-            //TODO: review the data format; we don't want arbitrary strings to be copied from other apps
-            // Currently we separate the IDs of selected items with comma. This may be subject of refactoring for a more
-            // elaborate serialized format (e.g. XML)
-            StringJoiner joiner = new StringJoiner(",");
-            items.forEach(item -> joiner.add(item.getId()));
-            Clipboard clipboard = Clipboard.getSystemClipboard();
-            ClipboardContent content = new ClipboardContent();
-            content.putString(joiner.toString());
-            clipboard.setContent(content);
-        });
+        copy.setOnAction(event -> copyItems());
         return copy;
     }
 
-    private MenuItem deleteMenuItem(Set<DiagramItem> items) {
-        MenuItem delete = new MenuItem("Delete");
-        delete.setOnAction(event -> {
-            Iterator<DiagramItem> itemsIter = items.iterator();
-            while (itemsIter.hasNext()) {
-                DiagramItem nextSelected = itemsIter.next();
-                itemsIter.remove();
-                getChildren().remove(nextSelected);
-            }
+    private void copyItems() {
+        //TODO: review the data format; we don't want arbitrary strings to be copied from other apps
+        // Currently we separate the IDs of selected items with comma. This may be subject of refactoring for a more
+        // elaborate serialized format (e.g. XML)
+        selectedItemsRelativeCursorPositions.clear();
+        StringJoiner joiner = new StringJoiner(",");
+        selectedItems.forEach(item -> {
+            joiner.add(item.getId());
+            selectedItemsRelativeCursorPositions.put(item, new ItemCoord(mouseSceneX - item.getLayoutX(),
+                    mouseSceneY - item.getLayoutY()));
         });
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(joiner.toString());
+        clipboard.setContent(content);
+    }
+
+    private MenuItem deleteMenuItem() {
+        MenuItem delete = new MenuItem("Delete");
+        delete.setOnAction(event -> deleteItems(selectedItems));
         return delete;
     }
 
-    //TODO: continue implementing pasteMenuItem()
-    private MenuItem pasteMenuItem(MouseEvent event) {
+    private void deleteItems(Set<DiagramItem> items) {
+        Iterator<DiagramItem> itemsIter = items.iterator();
+        while (itemsIter.hasNext()) {
+            DiagramItem nextSelected = itemsIter.next();
+            itemsIter.remove();
+            getChildren().remove(nextSelected);
+        }
+    }
+
+    private MenuItem pasteMenuItem() {
         MenuItem paste = new MenuItem("Paste");
-        paste.setOnAction(actionEvent -> {
-            Clipboard clipboard = Clipboard.getSystemClipboard();
-            String[] ids = clipboard.getString().split(",");
-            // We paste the new item in the cursor position
-            if (ids.length == 1) {
-                DiagramItem item = DiagramItemRegistry.getItem(ids[0]);
-                if (item != null) {
-                    DiagramItem itemCopy = item.copy();
-                    itemCopy.relocate(event.getSceneX(), event.getSceneY());
-                    addItem(itemCopy);
-                }
-            }
-            // We paste all items in their relative positions to the cursor
-            else {
-                for (String id : ids) {
-                    //TODO: continue
-                }
-            }
-        });
+        paste.setOnAction(actionEvent -> pasteItems());
         return paste;
+    }
+
+    private void pasteItems() {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        String[] ids = clipboard.getString().split(",");
+        // We paste the new item in the cursor position
+        if (ids.length == 1) {
+            DiagramItem item = DiagramItemRegistry.getItem(ids[0]);
+            DiagramItem itemCopy = item.copy();
+            itemCopy.relocate(mouseSceneX, mouseSceneY);
+            addItem(itemCopy);
+        }
+        // We paste all items in their relative positions to the cursor
+        else {
+            for (String id : ids) {
+                DiagramItem item = DiagramItemRegistry.getItem(id);
+                DiagramItem itemCopy = item.copy();
+                ItemCoord delta = selectedItemsRelativeCursorPositions.get(item);
+                itemCopy.relocate(mouseSceneX - delta.x, mouseSceneY - delta.y);
+                addItem(itemCopy);
+            }
+        }
     }
 
     private void setupRubberBandSelection() {

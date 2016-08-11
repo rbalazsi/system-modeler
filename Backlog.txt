@@ -16,6 +16,10 @@
     -> only if Shift is still down on mouse released event, otherwise items will only be moved
     -> copies maintain the positional relationships of selected items
 
+ - !! BUGS:
+    -> System clipboard doesn't work well, it has string even if nothing was copied. Use a dedicated global DiagramItemClipboard class instead.
+    -> On paste, items' relative positions are not respected.
+
 2. Vector graphics
  - define a custom control point
  - moving it modifies the bounded box of the parent item
