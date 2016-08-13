@@ -14,3 +14,21 @@ TODO write up the changelog from previous commits
 
 ISSUES:
  - clicking away when text box is shown does not close it, ENTER/ESCAPE needs to be pressed for that
+
+
+# 08-14-2016 Copy/Paste and Delete functionality
+ - install right-click context menu on diagram items
+    -> Copy - copies all selected items
+    -> Delete - deletes all selected items
+ - install right-click context menu on diagram
+    -> Copy - if there are selected items (copies all selected), otherwise not shown
+    -> Paste - if items were copied on clipboard, otherwise not shown
+    -> Delete - if there are selected items, otherwise not shown
+ - add items to Edit menu with the same behavior as in diagram right-click context menu
+ - paste will duplicate the selected items and place them at cursor position
+    -> copies maintain the positional relationships of selected items
+ - shortcuts: Ctrl-C for copy, Ctrl-V for paste, DELETE for delete
+ - Shift-drag Copy:
+    -> when items are selected, holding down Shift and dragging the mouse will duplicate the selected items
+    -> only if Shift is still down on mouse released event, otherwise operation is cancelled
+    -> copies maintain the positional relationships of selected items

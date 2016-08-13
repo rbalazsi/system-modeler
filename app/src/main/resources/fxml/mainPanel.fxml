@@ -14,7 +14,9 @@
 
 <?import com.robertbalazsi.systemmodeler.palette.PaletteView?>
 <?import com.robertbalazsi.systemmodeler.diagram.Diagram?>
-<BorderPane fx:id="mainPane" prefWidth="1024.0" prefHeight="768.0"  xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.robertbalazsi.systemmodeler.MainController">
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<BorderPane fx:id="mainPane" prefWidth="1024.0" prefHeight="768.0" xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.robertbalazsi.systemmodeler.MainController">
 
 
     <top>
@@ -22,14 +24,32 @@
             <children>
                 <MenuBar>
                     <menus>
-                        <Menu mnemonicParsing="false" text="File">
+                        <Menu mnemonicParsing="true" text="_File">
                             <items>
-                                <MenuItem mnemonicParsing="false" text="New" />
-                                <MenuItem mnemonicParsing="false" text="Exit" />
+                                <MenuItem mnemonicParsing="true" text="_New" />
+                                <MenuItem mnemonicParsing="true" text="_Exit" />
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Edit">
+                        <Menu mnemonicParsing="true" text="_Edit">
                             <items>
+                                <MenuItem fx:id="copyMenuItem" mnemonicParsing="true" text="_Copy">
+                                    <accelerator>
+                                        <KeyCodeCombination code="C" shift="UP" control="DOWN" alt="UP" meta="UP" shortcut="UP" />
+                                    </accelerator>
+                                </MenuItem>
+
+                                <MenuItem fx:id="pasteMenuItem" mnemonicParsing="true" text="_Paste">
+                                    <accelerator>
+                                        <KeyCodeCombination code="V" shift="UP" control="DOWN" alt="UP" meta="UP" shortcut="UP" />
+                                    </accelerator>
+                                </MenuItem>
+
+                                <MenuItem fx:id="deleteMenuItem" mnemonicParsing="true" text="_Delete">
+                                    <accelerator>
+                                        <KeyCodeCombination code="DELETE" shift="UP" control="UP" alt="UP" meta="UP" shortcut="UP" />
+                                    </accelerator>
+                                </MenuItem>
+                                <SeparatorMenuItem />
                                 <MenuItem mnemonicParsing="false" text="Preferences" />
                             </items>
                         </Menu>

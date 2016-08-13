@@ -5,8 +5,10 @@ import com.robertbalazsi.systemmodeler.diagram.Diagram;
 import com.robertbalazsi.systemmodeler.palette.PaletteItemCategory;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import com.robertbalazsi.systemmodeler.palette.PaletteView;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.MenuItem;
 
 import java.net.URL;
 import java.util.List;
@@ -23,10 +25,21 @@ public class MainController implements Initializable {
     @FXML
     private Diagram diagram;
 
+    @FXML
+    public MenuItem copyMenuItem;
+
+    @FXML
+    public MenuItem pasteMenuItem;
+
+    @FXML
+    public MenuItem deleteMenuItem;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //TODO: load real items
         fillPaletteWithDummyItems(paletteView);
+
+        setupMenus();
     }
 
     private static void fillPaletteWithDummyItems(PaletteView paletteView) {
@@ -52,5 +65,22 @@ public class MainController implements Initializable {
         itemCategories.add(databases);
 
         paletteView.setItems(itemCategories);
+    }
+
+    private void setupMenus() {
+        copyMenuItem.disableProperty().bind(diagram.selectedItemsProperty().emptyProperty());
+        copyMenuItem.setOnAction(event -> {
+            diagram.copySelected();
+        });
+
+        pasteMenuItem.disableProperty().bind(diagram.itemsCopiedProperty().not());
+        pasteMenuItem.setOnAction(event -> {
+            diagram.pasteItems(true);
+        });
+
+        deleteMenuItem.disableProperty().bind(diagram.selectedItemsProperty().emptyProperty());
+        deleteMenuItem.setOnAction(event -> {
+            diagram.deleteSelected();
+        });
     }
 }

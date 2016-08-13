@@ -8,6 +8,7 @@ import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -29,10 +30,12 @@ public abstract class DiagramItem extends Canvas {
     public static final TextAlignment DEFAULT_TEXT_ALIGN = TextAlignment.CENTER;
     public static final VPos DEFAULT_TEXT_BASELINE = VPos.CENTER;
     public static final Paint DEFAULT_FILL = Color.BLACK;
+    public static final double DRAG_COPY_THRESHOLD = 10;
 
     private boolean isMoving = false;
     private boolean isResizing = false;
     private boolean isDragCopying = false;
+    private double initMouseX, initMouseY;
     private List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
 
@@ -168,6 +171,8 @@ public abstract class DiagramItem extends Canvas {
     public static void baseCopy(DiagramItem source, DiagramItem target) {
         target.setLayoutX(source.getLayoutX());
         target.setLayoutY(source.getLayoutY());
+        target.setTranslateX(source.getTranslateX());
+        target.setTranslateY(source.getTranslateY());
         target.setWidth(source.getWidth());
         target.setHeight(source.getHeight());
         target.setFont(source.getFont());
@@ -307,13 +312,13 @@ public abstract class DiagramItem extends Canvas {
 
         this.setOnMousePressed(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
+                initMouseX = event.getSceneX();
+                initMouseY = event.getSceneY();
                 selectedControlPoint = getSelectedControlPoint(event.getX(), event.getY());
                 if (selectedControlPoint != null) {
                     selectedControlPoint.receiveMousePressed(event);
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZE_STARTED, event));
-                } else if (event.isShiftDown()) {
-                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_STARTED, event));
-                } else {
+                } else if (!event.isShiftDown()) {
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVE_STARTED, event));
                 }
             }
@@ -332,13 +337,15 @@ public abstract class DiagramItem extends Canvas {
                     redraw();
                     selectedControlPoint.select();
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZING, event));
+                } else if (!isDragCopying && event.isShiftDown() && isBeyondDragCopyThreshold(event)) {
+                    isDragCopying = true;
+                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_STARTED, event));
+                } else if (isDragCopying && event.isShiftDown()) {
+                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPYING, event));
                 } else if (isDragCopying && !event.isShiftDown()) {
                     isDragCopying = false;
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event));
-                } else if (event.isShiftDown()) {
-                    isDragCopying = true;
-                    fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPYING, event));
-                } else {
+                } else if (!event.isShiftDown()) {
                     isMoving = true;
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.MOVING, event));
                 }
@@ -369,7 +376,6 @@ public abstract class DiagramItem extends Canvas {
     public abstract DiagramItem copy();
 
     protected abstract void draw();
-
 
     public final void redraw() {
         clear();
@@ -462,5 +468,10 @@ public abstract class DiagramItem extends Canvas {
             }
         }
         return null;
+    }
+
+    private boolean isBeyondDragCopyThreshold(MouseEvent event) {
+        return (Math.abs(initMouseX - event.getSceneX()) >= DRAG_COPY_THRESHOLD) ||
+                Math.abs(initMouseY - event.getSceneY()) >= DRAG_COPY_THRESHOLD;
     }
 }
