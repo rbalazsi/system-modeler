@@ -5,6 +5,7 @@ import com.robertbalazsi.systemmodeler.controlpoint.Location;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 
 import java.util.Arrays;
@@ -75,6 +76,7 @@ public class RoundedRectangle extends DiagramItem {
         gc.setStroke(Color.TRANSPARENT);
         gc.fillRoundRect(getPadding(), getPadding(), getWidth() - 2*getPadding(), getHeight() - 2*getPadding(),
                 getArcWidth(), getArcHeight());
+        gc.applyEffect(new DropShadow(2.0, 3.0, 3.0, Color.GREY));
         gc.save();
     }
 

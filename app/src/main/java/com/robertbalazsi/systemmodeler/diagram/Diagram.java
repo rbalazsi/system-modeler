@@ -1,5 +1,8 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
+import com.robertbalazsi.systemmodeler.command.DeselectCommand;
+import com.robertbalazsi.systemmodeler.command.SelectCommand;
+import com.robertbalazsi.systemmodeler.global.ChangeManager;
 import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import javafx.beans.property.BooleanProperty;
@@ -119,6 +122,10 @@ public class Diagram extends Pane {
                 copySelected();
             } else if (event.isControlDown() && event.getCode() == KeyCode.V) {
                 pasteItems(false);
+            } else if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.Z) {
+                redoLast();
+            } else if (event.isControlDown() && event.getCode() == KeyCode.Z) {
+                undoLast();
             }
             event.consume();
         });
@@ -224,6 +231,14 @@ public class Diagram extends Pane {
         itemsCopied.set(false);
     }
 
+    public void undoLast() {
+        ChangeManager.getInstance().undoLast();
+    }
+
+    public void redoLast() {
+        ChangeManager.getInstance().redoLast();
+    }
+
     private boolean mousePointerInAnyCanvasItem(double mouseX, double mouseY) {
         for (Node child : getChildren()) {
             if (child.getBoundsInParent().contains(mouseX, mouseY)) {
@@ -266,12 +281,15 @@ public class Diagram extends Pane {
             MouseEvent mouseEvent = event.getMouseEvent();
             if (!mouseEvent.isShiftDown() && !mouseEvent.isControlDown()) {
                 clearSelection();
+                //TODO redoable
             }
             if (mouseEvent.isControlDown() && isSelected(item)) {
                 deselect(item);
+                ChangeManager.getInstance().putCommand(new DeselectCommand(this, item));
             } else {
                 if (!isSelected(item)) {
                     select(item);
+                    ChangeManager.getInstance().putCommand(new SelectCommand(this, item));
                 }
             }
             event.consume();
@@ -477,14 +495,18 @@ public class Diagram extends Pane {
                         if (rubberBandRect.getBoundsInParent().contains(diagramItem.getBoundsInParent())) {
                             if (event.isShiftDown()) {
                                 select(diagramItem);
+                                ChangeManager.getInstance().putCommand(new SelectCommand(Diagram.this, diagramItem));
                             } else if (event.isControlDown()) {
                                 if (isSelected(diagramItem)) {
                                     deselect(diagramItem);
+                                    ChangeManager.getInstance().putCommand(new DeselectCommand(Diagram.this, diagramItem));
                                 } else {
                                     select(diagramItem);
+                                    ChangeManager.getInstance().putCommand(new SelectCommand(Diagram.this, diagramItem));
                                 }
                             } else {
                                 select(diagramItem);
+                                ChangeManager.getInstance().putCommand(new SelectCommand(Diagram.this, diagramItem));
                             }
                         }
                     }

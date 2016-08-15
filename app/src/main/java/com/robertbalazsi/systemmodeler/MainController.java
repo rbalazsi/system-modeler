@@ -52,6 +52,9 @@ public class MainController implements Initializable {
         basicShapes.getItems().add(PaletteItemRegistry.ELLIPSE);
         basicShapes.getItems().add(PaletteItemRegistry.TRIANGLE);
 
+        PaletteItemCategory text = new PaletteItemCategory("Basic Shapes");
+        text.getItems().add(PaletteItemRegistry.LABEL);
+
         PaletteItemCategory umlClassDiagram = new PaletteItemCategory("UML - class diagram");
         umlClassDiagram.getItems().add("Class");
         umlClassDiagram.getItems().add("Interface");
@@ -61,6 +64,7 @@ public class MainController implements Initializable {
         databases.getItems().add("Database");
 
         itemCategories.add(basicShapes);
+        itemCategories.add(text);
         itemCategories.add(umlClassDiagram);
         itemCategories.add(databases);
 
