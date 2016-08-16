@@ -1,14 +1,10 @@
 package com.robertbalazsi.systemmodeler.command;
 
 /**
- * Encapsulates the undoable copying of diagram items.
+ * Encapsulates the undoable changing of an item's property.
  * TODO implement
  */
-public class CopyCommand implements Command {
-
-    public CopyCommand() {
-
-    }
+public class PropertyChangeCommand implements Command {
 
     @Override
     public void execute() {

@@ -1,7 +1,7 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
-import com.robertbalazsi.systemmodeler.command.DeselectCommand;
-import com.robertbalazsi.systemmodeler.command.SelectCommand;
+import com.robertbalazsi.systemmodeler.command.Command;
+import com.robertbalazsi.systemmodeler.command.SelectionChangeCommand;
 import com.robertbalazsi.systemmodeler.global.ChangeManager;
 import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
@@ -98,7 +98,9 @@ public class Diagram extends Pane {
             } else {
                 // We clean the selection if the mouse pointer wasn't in any of the items' bounds.
                 if (!mousePointerInAnyCanvasItem(event.getX(), event.getY())) {
-                    clearSelection();
+                    Command clearSelectionCommand = new SelectionChangeCommand(this, Collections.emptyList(), selectedItems);
+                    ChangeManager.getInstance().putCommand(clearSelectionCommand);
+                    clearSelectionCommand.execute();
                 }
                 if (isItemEditing) {
                     getChildren().remove(itemTextEditor);
@@ -279,19 +281,22 @@ public class Diagram extends Pane {
     private void installItemEventHandlers(DiagramItem item) {
         item.addEventHandler(DiagramItemMouseEvent.SELECTED, event -> {
             MouseEvent mouseEvent = event.getMouseEvent();
+            Command selectionCommand = null;
             if (!mouseEvent.isShiftDown() && !mouseEvent.isControlDown()) {
-                clearSelection();
-                //TODO redoable
+                selectionCommand = new SelectionChangeCommand(this, Collections.emptyList(), selectedItems);
             }
             if (mouseEvent.isControlDown() && isSelected(item)) {
-                deselect(item);
-                ChangeManager.getInstance().putCommand(new DeselectCommand(this, item));
+                selectionCommand = new SelectionChangeCommand(this, Collections.emptyList(), Collections.singletonList(item));
             } else {
                 if (!isSelected(item)) {
-                    select(item);
-                    ChangeManager.getInstance().putCommand(new SelectCommand(this, item));
+                    selectionCommand = new SelectionChangeCommand(this, Collections.singletonList(item), Collections.emptyList());
                 }
             }
+            if (selectionCommand != null) {
+                ChangeManager.getInstance().putCommand(selectionCommand);
+                selectionCommand.execute();
+            }
+
             event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.MOVE_STARTED, event -> {
@@ -490,26 +495,28 @@ public class Diagram extends Pane {
                     if (!event.isShiftDown() && !event.isControlDown()) {
                         clearSelection();
                     }
+                    List<DiagramItem> selectedItems = new ArrayList<>();
+                    List<DiagramItem> deselectedItems = new ArrayList<>();
                     for (Node item : getChildren().stream().filter(node -> node instanceof DiagramItem).collect(Collectors.toList())) {
                         DiagramItem diagramItem = (DiagramItem) item;
                         if (rubberBandRect.getBoundsInParent().contains(diagramItem.getBoundsInParent())) {
                             if (event.isShiftDown()) {
-                                select(diagramItem);
-                                ChangeManager.getInstance().putCommand(new SelectCommand(Diagram.this, diagramItem));
+                                selectedItems.add(diagramItem);
                             } else if (event.isControlDown()) {
                                 if (isSelected(diagramItem)) {
-                                    deselect(diagramItem);
-                                    ChangeManager.getInstance().putCommand(new DeselectCommand(Diagram.this, diagramItem));
+                                    deselectedItems.add(diagramItem);
                                 } else {
-                                    select(diagramItem);
-                                    ChangeManager.getInstance().putCommand(new SelectCommand(Diagram.this, diagramItem));
+                                    selectedItems.add(diagramItem);
                                 }
                             } else {
-                                select(diagramItem);
-                                ChangeManager.getInstance().putCommand(new SelectCommand(Diagram.this, diagramItem));
+                                selectedItems.add(diagramItem);
                             }
                         }
                     }
+                    Command selectionCommand = new SelectionChangeCommand(this, selectedItems, deselectedItems);
+                    selectionCommand.execute();
+                    ChangeManager.getInstance().putCommand(selectionCommand);
+
                     getChildren().remove(rubberBandRect);
                     rubberBandRect = null;
                     rubberBandSelect = false;
