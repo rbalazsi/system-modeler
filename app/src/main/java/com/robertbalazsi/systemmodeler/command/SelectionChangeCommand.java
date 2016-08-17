@@ -24,9 +24,11 @@ public class SelectionChangeCommand implements Command {
     @Override
     public void execute() {
         selectedItems.forEach(diagram::select);
-//        Iterator<DiagramItem> iterator = deselectedItems.iterator();
-//        while (iterator.hasNext())
-        deselectedItems.forEach(diagram::deselect);
+        Iterator<DiagramItem> iterator = deselectedItems.iterator();
+        while (iterator.hasNext()) {
+            DiagramItem nextItem = iterator.next();
+            diagram.deselect(nextItem);
+        }
     }
 
     @Override

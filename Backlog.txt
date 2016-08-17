@@ -4,6 +4,7 @@
     -> Undo is enabled if there was at least one operation already made
     -> Redo is enabled if there was at least one operation already undone
  - shortcuts: Ctrl-Z for Undo, Ctrl-Shift-Z for Redo
+ - if, after Undo, other operation "path" is chosen, the Redo stack is cleared out
 
 2. Vector graphics
  - define a custom control point

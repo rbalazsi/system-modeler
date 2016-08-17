@@ -1,6 +1,7 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
 import com.robertbalazsi.systemmodeler.command.Command;
+import com.robertbalazsi.systemmodeler.command.DeleteCommand;
 import com.robertbalazsi.systemmodeler.command.SelectionChangeCommand;
 import com.robertbalazsi.systemmodeler.global.ChangeManager;
 import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
@@ -140,18 +141,19 @@ public class Diagram extends Pane {
     }
 
     //TODO: removeItem() to uninstall event handlers
-    public void removeItem(DiagramItem item) {
-        DiagramItemRegistry.removeItem(item.getId());
-        selectedItems.remove(item);
-        getChildren().remove(item);
+    public void removeItems(List<DiagramItem> items) {
+        Command deleteCommand = new DeleteCommand(this, items);
+        deleteCommand.execute();
     }
 
+    //TODO: refactor it to be multiple items, other ConcurrentModificationExceptions may appear
     public void select(DiagramItem item) {
         item.setSelected(true);
         item.requestFocus();
         selectedItems.add(item);
     }
 
+    //TODO: refactor it to be multiple items, other ConcurrentModificationExceptions may appear
     public void deselect(DiagramItem item) {
         item.setSelected(false);
         selectedItems.remove(item);
@@ -224,12 +226,7 @@ public class Diagram extends Pane {
     }
 
     public void deleteSelected() {
-        Iterator<DiagramItem> itemsIter = selectedItems.iterator();
-        while (itemsIter.hasNext()) {
-            DiagramItem nextSelected = itemsIter.next();
-            itemsIter.remove();
-            getChildren().remove(nextSelected);
-        }
+        removeItems(new ArrayList<>(selectedItems));
         itemsCopied.set(false);
     }
 
@@ -391,7 +388,7 @@ public class Diagram extends Pane {
         });
         item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event -> {
             isDragCopying = false;
-            dragCopyItems.forEach(this::removeItem);
+            removeItems(dragCopyItems);
             dragCopyItems.clear();
             event.consume();
         });
