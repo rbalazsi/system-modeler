@@ -142,22 +142,33 @@ public class Diagram extends Pane {
 
     //TODO: removeItem() to uninstall event handlers
     public void removeItems(List<DiagramItem> items) {
-        Command deleteCommand = new DeleteCommand(this, items);
-        deleteCommand.execute();
+        Iterator<DiagramItem> itemIterator = items.iterator();
+        while (itemIterator.hasNext()) {
+            DiagramItem nextItem = itemIterator.next();
+            DiagramItemRegistry.removeItem(nextItem.getId());
+            itemIterator.remove();
+            this.getChildren().remove(nextItem);
+        }
     }
 
-    //TODO: refactor it to be multiple items, other ConcurrentModificationExceptions may appear
-    public void select(DiagramItem item) {
-        item.setSelected(true);
-        item.requestFocus();
-        selectedItems.add(item);
+    public void selectItems(Collection<DiagramItem> items) {
+        Iterator<DiagramItem> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            DiagramItem item = iterator.next();
+            item.setSelected(true);
+            item.requestFocus();
+            selectedItems.add(item);
+        }
     }
 
-    //TODO: refactor it to be multiple items, other ConcurrentModificationExceptions may appear
-    public void deselect(DiagramItem item) {
-        item.setSelected(false);
-        selectedItems.remove(item);
-        initialStateMap.remove(item);
+    public void deselectItems(Collection<DiagramItem> items) {
+        Iterator<DiagramItem> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            DiagramItem item = iterator.next();
+            item.setSelected(false);
+            selectedItems.remove(item);
+            initialStateMap.remove(item);
+        }
     }
 
     public boolean isSelected(DiagramItem item) {
@@ -226,7 +237,8 @@ public class Diagram extends Pane {
     }
 
     public void deleteSelected() {
-        removeItems(new ArrayList<>(selectedItems));
+        Command deleteCommand = new DeleteCommand(this, new ArrayList<>(selectedItems));
+        deleteCommand.execute();
         itemsCopied.set(false);
     }
 
@@ -389,7 +401,6 @@ public class Diagram extends Pane {
         item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event -> {
             isDragCopying = false;
             removeItems(dragCopyItems);
-            dragCopyItems.clear();
             event.consume();
         });
 

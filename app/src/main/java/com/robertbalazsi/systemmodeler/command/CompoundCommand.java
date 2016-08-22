@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * An atomic compound command formed by multiple commands. They are executed in the given order, and undone in reverse order.
+ * A compound command formed by multiple commands. They are executed in the given order, and undone in reverse order.
  */
 public class CompoundCommand implements Command {
 
