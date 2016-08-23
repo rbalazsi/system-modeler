@@ -1,11 +1,12 @@
 package com.robertbalazsi.systemmodeler;
 
 import com.google.common.collect.Lists;
+import com.robertbalazsi.systemmodeler.command.Command;
 import com.robertbalazsi.systemmodeler.diagram.Diagram;
+import com.robertbalazsi.systemmodeler.global.ChangeManager;
 import com.robertbalazsi.systemmodeler.palette.PaletteItemCategory;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import com.robertbalazsi.systemmodeler.palette.PaletteView;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuItem;
@@ -25,14 +26,11 @@ public class MainController implements Initializable {
     @FXML
     private Diagram diagram;
 
-    @FXML
-    public MenuItem copyMenuItem;
-
-    @FXML
-    public MenuItem pasteMenuItem;
-
-    @FXML
-    public MenuItem deleteMenuItem;
+    @FXML public MenuItem undoMenuItem;
+    @FXML public MenuItem redoMenuItem;
+    @FXML public MenuItem copyMenuItem;
+    @FXML public MenuItem pasteMenuItem;
+    @FXML public MenuItem deleteMenuItem;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -72,6 +70,18 @@ public class MainController implements Initializable {
     }
 
     private void setupMenus() {
+        undoMenuItem.disableProperty().bind(ChangeManager.getInstance().undoStackProperty().emptyProperty());
+        undoMenuItem.setOnAction(event -> {
+            Command undo = ChangeManager.getInstance().undoLast();
+            undo.execute();
+        });
+
+        redoMenuItem.disableProperty().bind(ChangeManager.getInstance().redoStackProperty().emptyProperty());
+        redoMenuItem.setOnAction(event -> {
+            Command redo = ChangeManager.getInstance().redoLast();
+            redo.execute();
+        });
+
         copyMenuItem.disableProperty().bind(diagram.selectedItemsProperty().emptyProperty());
         copyMenuItem.setOnAction(event -> {
             diagram.copySelected();

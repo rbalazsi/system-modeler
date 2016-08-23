@@ -1,9 +1,9 @@
 package com.robertbalazsi.systemmodeler.global;
 
 import com.robertbalazsi.systemmodeler.command.Command;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 
 /**
  * Global component that manages the changes of a diagram, supporting Undo & Redo functionality.
@@ -12,15 +12,15 @@ public class ChangeManager {
 
     private static final ChangeManager INSTANCE = new ChangeManager();
 
-    private ReadOnlyListProperty<Command> undoStack = new SimpleListProperty<>(this, "undoStack");
+    private ReadOnlyListProperty<Command> undoStack = new SimpleListProperty<>(this, "undoStack", FXCollections.observableArrayList());
 
     public ReadOnlyListProperty<Command> undoStackProperty() {
         return undoStack;
     }
 
-    private ListProperty<Command> redoStack = new SimpleListProperty<>(this, "redoStack");
+    private ReadOnlyListProperty<Command> redoStack = new SimpleListProperty<>(this, "redoStack", FXCollections.observableArrayList());
 
-    public ListProperty<Command> redoStackProperty() {
+    public ReadOnlyListProperty<Command> redoStackProperty() {
         return redoStack;
     }
 
@@ -33,7 +33,7 @@ public class ChangeManager {
     }
 
     public void putCommand(Command command) {
-        undoStack.add(command);
+        undoStack.get().add(command);
     }
 
     public Command undoLast() {
@@ -54,7 +54,7 @@ public class ChangeManager {
 
         Command redo = redoStack.remove(redoStack.size() - 1);
         redo.execute();
-        undoStack.add(redo);
+        undoStack.get().add(redo);
         return redo;
     }
 

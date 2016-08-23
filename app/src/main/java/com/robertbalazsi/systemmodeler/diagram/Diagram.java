@@ -125,10 +125,6 @@ public class Diagram extends Pane {
                 copySelected();
             } else if (event.isControlDown() && event.getCode() == KeyCode.V) {
                 pasteItems(false);
-            } else if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.Z) {
-                redoLast();
-            } else if (event.isControlDown() && event.getCode() == KeyCode.Z) {
-                undoLast();
             }
             event.consume();
         });
@@ -166,7 +162,7 @@ public class Diagram extends Pane {
         while (iterator.hasNext()) {
             DiagramItem item = iterator.next();
             item.setSelected(false);
-            selectedItems.remove(item);
+            items.remove(item);
             initialStateMap.remove(item);
         }
     }
@@ -238,6 +234,7 @@ public class Diagram extends Pane {
 
     public void deleteSelected() {
         Command deleteCommand = new DeleteCommand(this, new ArrayList<>(selectedItems));
+        ChangeManager.getInstance().putCommand(deleteCommand);
         deleteCommand.execute();
         itemsCopied.set(false);
     }
@@ -287,21 +284,28 @@ public class Diagram extends Pane {
         });
     }
 
+    //TODO: IMPORTANT Selection broken, retest and fix it!
     private void installItemEventHandlers(DiagramItem item) {
         item.addEventHandler(DiagramItemMouseEvent.SELECTED, event -> {
             MouseEvent mouseEvent = event.getMouseEvent();
             Command selectionCommand = null;
+
+            Collection<DiagramItem> selectedItems = null;
+            Collection<DiagramItem> deselectedItems = null;
             if (!mouseEvent.isShiftDown() && !mouseEvent.isControlDown()) {
-                selectionCommand = new SelectionChangeCommand(this, Collections.emptyList(), selectedItems);
+                selectedItems = Collections.emptyList();
+                deselectedItems = this.selectedItems;
             }
             if (mouseEvent.isControlDown() && isSelected(item)) {
-                selectionCommand = new SelectionChangeCommand(this, Collections.emptyList(), Collections.singletonList(item));
-            } else {
-                if (!isSelected(item)) {
-                    selectionCommand = new SelectionChangeCommand(this, Collections.singletonList(item), Collections.emptyList());
-                }
+                selectedItems = Collections.emptyList();
+                deselectedItems = Collections.singletonList(item);
+            } else if (!isSelected(item)) {
+                selectedItems = Collections.singletonList(item);
+                deselectedItems = deselectedItems.isEmpty() ? Collections.emptyList() : deselectedItems;
             }
-            if (selectionCommand != null) {
+
+            if (selectedItems != null && deselectedItems != null) {
+                selectionCommand = new SelectionChangeCommand(this, selectedItems, deselectedItems);
                 ChangeManager.getInstance().putCommand(selectionCommand);
                 selectionCommand.execute();
             }
