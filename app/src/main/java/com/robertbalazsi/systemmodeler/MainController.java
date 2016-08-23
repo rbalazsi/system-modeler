@@ -72,14 +72,12 @@ public class MainController implements Initializable {
     private void setupMenus() {
         undoMenuItem.disableProperty().bind(ChangeManager.getInstance().undoStackProperty().emptyProperty());
         undoMenuItem.setOnAction(event -> {
-            Command undo = ChangeManager.getInstance().undoLast();
-            undo.execute();
+            ChangeManager.getInstance().undoLast();
         });
 
         redoMenuItem.disableProperty().bind(ChangeManager.getInstance().redoStackProperty().emptyProperty());
         redoMenuItem.setOnAction(event -> {
-            Command redo = ChangeManager.getInstance().redoLast();
-            redo.execute();
+            ChangeManager.getInstance().redoLast();
         });
 
         copyMenuItem.disableProperty().bind(diagram.selectedItemsProperty().emptyProperty());

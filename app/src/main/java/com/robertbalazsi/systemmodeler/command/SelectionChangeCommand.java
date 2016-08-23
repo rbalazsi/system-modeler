@@ -3,8 +3,8 @@ package com.robertbalazsi.systemmodeler.command;
 import com.robertbalazsi.systemmodeler.diagram.Diagram;
 import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Encapsulates the undoable changing of the selection on the diagram. This includes both selected and deselected items.
@@ -23,13 +23,13 @@ public class SelectionChangeCommand implements Command {
 
     @Override
     public void execute() {
-        diagram.selectItems(selectedItems);
-        diagram.deselectItems(deselectedItems);
+        diagram.deselectItems(new ArrayList<>(deselectedItems));
+        diagram.selectItems(new ArrayList<>(selectedItems));
     }
 
     @Override
     public void undo() {
-        diagram.selectItems(deselectedItems);
-        diagram.deselectItems(selectedItems);
+        diagram.deselectItems(new ArrayList<>(selectedItems));
+        diagram.selectItems(new ArrayList<>(deselectedItems));
     }
 }

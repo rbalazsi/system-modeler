@@ -148,9 +148,7 @@ public class Diagram extends Pane {
     }
 
     public void selectItems(Collection<DiagramItem> items) {
-        Iterator<DiagramItem> iterator = items.iterator();
-        while (iterator.hasNext()) {
-            DiagramItem item = iterator.next();
+        for (DiagramItem item : items) {
             item.setSelected(true);
             item.requestFocus();
             selectedItems.add(item);
@@ -158,11 +156,9 @@ public class Diagram extends Pane {
     }
 
     public void deselectItems(Collection<DiagramItem> items) {
-        Iterator<DiagramItem> iterator = items.iterator();
-        while (iterator.hasNext()) {
-            DiagramItem item = iterator.next();
+        for (DiagramItem item : items) {
             item.setSelected(false);
-            items.remove(item);
+            selectedItems.remove(item);
             initialStateMap.remove(item);
         }
     }
@@ -284,27 +280,23 @@ public class Diagram extends Pane {
         });
     }
 
-    //TODO: IMPORTANT Selection broken, retest and fix it!
     private void installItemEventHandlers(DiagramItem item) {
         item.addEventHandler(DiagramItemMouseEvent.SELECTED, event -> {
             MouseEvent mouseEvent = event.getMouseEvent();
             Command selectionCommand = null;
 
-            Collection<DiagramItem> selectedItems = null;
-            Collection<DiagramItem> deselectedItems = null;
+            List<DiagramItem> selectedItems = new ArrayList<>();
+            List<DiagramItem> deselectedItems = new ArrayList<>();
             if (!mouseEvent.isShiftDown() && !mouseEvent.isControlDown()) {
-                selectedItems = Collections.emptyList();
-                deselectedItems = this.selectedItems;
-            }
-            if (mouseEvent.isControlDown() && isSelected(item)) {
-                selectedItems = Collections.emptyList();
-                deselectedItems = Collections.singletonList(item);
+                deselectedItems.addAll(this.selectedItems);
+                selectedItems.add(item);
+            } else if (mouseEvent.isControlDown() && isSelected(item)) {
+                deselectedItems.add(item);
             } else if (!isSelected(item)) {
-                selectedItems = Collections.singletonList(item);
-                deselectedItems = deselectedItems.isEmpty() ? Collections.emptyList() : deselectedItems;
+                selectedItems.add(item);
             }
 
-            if (selectedItems != null && deselectedItems != null) {
+            if (!selectedItems.isEmpty() || !deselectedItems.isEmpty()) {
                 selectionCommand = new SelectionChangeCommand(this, selectedItems, deselectedItems);
                 ChangeManager.getInstance().putCommand(selectionCommand);
                 selectionCommand.execute();
