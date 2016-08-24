@@ -1,7 +1,11 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
 import com.robertbalazsi.systemmodeler.command.Command;
+import com.robertbalazsi.systemmodeler.command.CompoundCommand;
+import com.robertbalazsi.systemmodeler.command.CopyToClipboardCommand;
 import com.robertbalazsi.systemmodeler.command.DeleteCommand;
+import com.robertbalazsi.systemmodeler.command.PasteItemsCommand;
+import com.robertbalazsi.systemmodeler.command.PropertyChangeCommand;
 import com.robertbalazsi.systemmodeler.command.SelectionChangeCommand;
 import com.robertbalazsi.systemmodeler.global.ChangeManager;
 import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
@@ -25,6 +29,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.util.*;
@@ -60,7 +65,7 @@ public class Diagram extends Pane {
     }
 
     private Map<DiagramItem, InitialState> initialStateMap = new HashMap<>();
-    private Map<DiagramItem, ItemCoord> selectedItemsPositionDeltas = new HashMap<>();
+    private Map<String, ItemCoord> selectedItemsPositionDeltas = new HashMap<>();
     private List<DiagramItem> dragCopyItems = new ArrayList<>();
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
@@ -115,17 +120,6 @@ public class Diagram extends Pane {
         this.setOnMouseMoved(event -> {
             mouseX = event.getX();
             mouseY = event.getY();
-            event.consume();
-        });
-
-        this.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.DELETE) {
-                deleteSelected();
-            } else if (event.isControlDown() && event.getCode() == KeyCode.C) {
-                copySelected();
-            } else if (event.isControlDown() && event.getCode() == KeyCode.V) {
-                pasteItems(false);
-            }
             event.consume();
         });
     }
@@ -201,14 +195,18 @@ public class Diagram extends Pane {
         double deltaY = topY + (bottomY - topY) / 2;
         for (DiagramItem item : selectedItems) {
             joiner.add(item.getId());
-            selectedItemsPositionDeltas.put(item, new ItemCoord(item.getLayoutX() - deltaX,
+            selectedItemsPositionDeltas.put(item.getId(), new ItemCoord(item.getLayoutX() - deltaX,
                     item.getLayoutY() - deltaY));
         }
-        Clipboard clipboard = Clipboard.getSystemClipboard();
         ClipboardContent content = new ClipboardContent();
         content.putString(CLIPBOARD_ITEMS_PREFIX + joiner.toString());
-        clipboard.setContent(content);
-        itemsCopied.set(true);
+
+        Command command = new CompoundCommand(Arrays.asList(
+                new CopyToClipboardCommand(content),
+                new PropertyChangeCommand<>(itemsCopied, true)
+        ));
+        ChangeManager.getInstance().putCommand(command);
+        command.execute();
     }
 
     public void pasteItems(boolean center) {
@@ -219,28 +217,24 @@ public class Diagram extends Pane {
         Clipboard clipboard = Clipboard.getSystemClipboard();
         String contents = clipboard.getString();
         String[] ids = contents.substring(CLIPBOARD_ITEMS_PREFIX.length(), contents.length()).split(",");
+        Map<String, ItemCoord> itemCoords = new HashMap<>();
         for (String id : ids) {
-            DiagramItem item = DiagramItemRegistry.getItem(id);
-            DiagramItem itemCopy = item.copy();
-            ItemCoord delta = selectedItemsPositionDeltas.get(item);
-            itemCopy.relocate(fromX + delta.x, fromY + delta.y);
-            addItem(itemCopy);
+            ItemCoord delta = selectedItemsPositionDeltas.get(id);
+            itemCoords.put(id, new ItemCoord(fromX + delta.x, fromY + delta.y));
         }
+
+        Command pasteCommand = new PasteItemsCommand(this, itemCoords);
+        ChangeManager.getInstance().putCommand(pasteCommand);
+        pasteCommand.execute();
     }
 
     public void deleteSelected() {
-        Command deleteCommand = new DeleteCommand(this, new ArrayList<>(selectedItems));
-        ChangeManager.getInstance().putCommand(deleteCommand);
-        deleteCommand.execute();
-        itemsCopied.set(false);
-    }
-
-    public void undoLast() {
-        ChangeManager.getInstance().undoLast();
-    }
-
-    public void redoLast() {
-        ChangeManager.getInstance().redoLast();
+        Command command = new CompoundCommand(Arrays.asList(
+                new DeleteCommand(this, new ArrayList<>(selectedItems)),
+                new PropertyChangeCommand<>(itemsCopied, false)
+        ));
+        ChangeManager.getInstance().putCommand(command);
+        command.execute();
     }
 
     private boolean mousePointerInAnyCanvasItem(double mouseX, double mouseY) {
@@ -544,8 +538,11 @@ public class Diagram extends Pane {
         }
     }
 
-    private static class ItemCoord {
+    public static class ItemCoord {
+        @Getter
         private final double x;
+
+        @Getter
         private final double y;
 
         ItemCoord(double x, double y) {

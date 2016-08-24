@@ -5,7 +5,6 @@ import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
 import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -25,11 +24,8 @@ public class DeleteCommand implements Command {
 
     @Override
     public void execute() {
-        Iterator<DiagramItem> itemIterator = itemsToDelete.iterator();
-        while (itemIterator.hasNext()) {
-            DiagramItem item = itemIterator.next();
+        for (DiagramItem item : itemsToDelete) {
             DiagramItemRegistry.removeItem(item.getId());
-            itemIterator.remove();
             diagram.getChildren().remove(item);
         }
     }

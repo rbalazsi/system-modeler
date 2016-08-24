@@ -15,7 +15,7 @@ public class DiagramItemRegistry {
     public static void putItem(DiagramItem item) {
         String id = item.getId();
         if (itemsMap.containsKey(id)) {
-            throw new IllegalArgumentException(String.format("Item with ID '%s' already exists."));
+            throw new IllegalArgumentException(String.format("Item with ID '%s' already exists.", id));
         }
         if (id == null) {
             item.setId("item_" + idCtr++);
