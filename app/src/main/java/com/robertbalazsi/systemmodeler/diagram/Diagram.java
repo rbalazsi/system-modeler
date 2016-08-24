@@ -450,7 +450,6 @@ public class Diagram extends Pane {
     private void setupRubberBandSelection() {
         this.setOnMousePressed(event -> {
             if (event.getButton() != MouseButton.SECONDARY) {
-                rubberBandSelect = true;
                 rubberBandInitX = event.getX();
                 rubberBandInitY = event.getY();
 
@@ -467,6 +466,7 @@ public class Diagram extends Pane {
 
         this.setOnMouseDragged(event -> {
             if (event.getButton() != MouseButton.SECONDARY) {
+                rubberBandSelect = true;
                 double offsetX = event.getX() - rubberBandInitX;
                 double offsetY = event.getY() - rubberBandInitY;
 
