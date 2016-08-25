@@ -363,7 +363,7 @@ public abstract class DiagramItem extends Canvas {
                 } else if (isDragCopying) {
                     isDragCopying = false;
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.DRAG_COPY_FINISHED, event));
-                } else {
+                } else if (isResizing) {
                     fireEvent(new DiagramItemMouseEvent(this, DiagramItemMouseEvent.RESIZE_FINISHED, event));
                 }
             }

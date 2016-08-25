@@ -33,6 +33,7 @@ public class ChangeManager {
     }
 
     public void putCommand(Command command) {
+        redoStack.clear();
         undoStack.get().add(command);
     }
 
@@ -56,13 +57,5 @@ public class ChangeManager {
         redo.execute();
         undoStack.get().add(redo);
         return redo;
-    }
-
-    public void clearUndos() {
-        undoStack.clear();
-    }
-
-    public void clearRedos() {
-        redoStack.clear();
     }
 }

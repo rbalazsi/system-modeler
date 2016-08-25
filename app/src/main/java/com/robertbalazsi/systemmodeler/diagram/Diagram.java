@@ -266,7 +266,7 @@ public class Diagram extends Pane {
                 DiagramItem item = PaletteItemRegistry.getItem(dragboard.getString());
                 if (item != null) {
                     item.relocate(event.getX(), event.getY());
-                    Command addCommand = new AddItemsCommand(this, Arrays.asList(item));
+                    Command addCommand = new AddItemsCommand(this, Collections.singletonList(item));
                     ChangeManager.getInstance().putCommand(addCommand);
                     addCommand.execute();
                     success = true;
@@ -348,10 +348,11 @@ public class Diagram extends Pane {
         item.addEventHandler(DiagramItemMouseEvent.MOVE_FINISHED, event -> {
             setCursor(Cursor.DEFAULT);
             isMultiMove = false;
-            Map<String, ItemCoord> itemDeltas = new HashMap<>();
+            Map<String, RelocateItemsCommand.ItemTranslateState> itemDeltas = new HashMap<>();
             for (Map.Entry<DiagramItem, ItemState> itemState : itemStateMap.entrySet()) {
                 ItemState state = itemState.getValue();
-                itemDeltas.put(itemState.getKey().getId(), new ItemCoord(state.currentTranslateX, state.currentTranslateY));
+                itemDeltas.put(itemState.getKey().getId(), new RelocateItemsCommand.ItemTranslateState(
+                        state.initTranslateX, state.initTranslateY, state.currentTranslateX, state.currentTranslateY));
             }
 
             // We are registering the command without running it because the relocation is already done at this point
