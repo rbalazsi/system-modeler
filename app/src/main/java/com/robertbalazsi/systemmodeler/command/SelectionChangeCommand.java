@@ -17,14 +17,14 @@ public class SelectionChangeCommand implements Command {
 
     public SelectionChangeCommand(Diagram diagram, Collection<DiagramItem> selectedItems, Collection<DiagramItem> deselectedItems) {
         this.diagram = diagram;
-        this.selectedItems = selectedItems;
-        this.deselectedItems = deselectedItems;
+        this.selectedItems = new ArrayList<>(selectedItems);
+        this.deselectedItems = new ArrayList<>(deselectedItems);
     }
 
     @Override
     public void execute() {
-        diagram.deselectItems(new ArrayList<>(deselectedItems));
-        diagram.selectItems(new ArrayList<>(selectedItems));
+        diagram.deselectItems(deselectedItems);
+        diagram.selectItems(selectedItems);
     }
 
     @Override

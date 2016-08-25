@@ -10,13 +10,13 @@ import java.util.List;
 /**
  * Encapsulates the undoable deletion of diagram items.
  */
-public class DeleteCommand implements Command {
+public class DeleteItemsCommand implements Command {
 
     private final Diagram diagram;
     private final List<DiagramItem> itemsToDelete;
     private List<DiagramItem> previousItems;
 
-    public DeleteCommand(Diagram diagram, List<DiagramItem> itemsToDelete) {
+    public DeleteItemsCommand(Diagram diagram, List<DiagramItem> itemsToDelete) {
         this.diagram = diagram;
         this.itemsToDelete = itemsToDelete;
         previousItems = new ArrayList<>(itemsToDelete);

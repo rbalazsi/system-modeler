@@ -1,7 +1,7 @@
 package com.robertbalazsi.systemmodeler.command;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * A compound command formed by multiple commands. They are executed in the given order, and undone in reverse order.
@@ -21,6 +21,9 @@ public class CompoundCommand implements Command {
 
     @Override
     public void undo() {
-        commands.stream().sorted(Collections.reverseOrder()).forEach(Command::undo);
+        ListIterator<Command> iterator = commands.listIterator(commands.size());
+        while (iterator.hasPrevious()) {
+            iterator.previous().undo();
+        }
     }
 }

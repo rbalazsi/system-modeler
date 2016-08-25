@@ -1,11 +1,14 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
+import com.robertbalazsi.systemmodeler.command.AddItemsCommand;
 import com.robertbalazsi.systemmodeler.command.Command;
 import com.robertbalazsi.systemmodeler.command.CompoundCommand;
 import com.robertbalazsi.systemmodeler.command.CopyToClipboardCommand;
-import com.robertbalazsi.systemmodeler.command.DeleteCommand;
+import com.robertbalazsi.systemmodeler.command.DeleteItemsCommand;
 import com.robertbalazsi.systemmodeler.command.PasteItemsCommand;
 import com.robertbalazsi.systemmodeler.command.PropertyChangeCommand;
+import com.robertbalazsi.systemmodeler.command.RelocateItemsCommand;
+import com.robertbalazsi.systemmodeler.command.ResizeItemCommand;
 import com.robertbalazsi.systemmodeler.command.SelectionChangeCommand;
 import com.robertbalazsi.systemmodeler.global.ChangeManager;
 import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
@@ -43,6 +46,7 @@ public class Diagram extends Pane {
     private static TextField itemTextEditor = new TextField();
     private static ContextMenu contextMenu = new ContextMenu();
     private static final String CLIPBOARD_ITEMS_PREFIX = "_items:";
+    private static final double RUBBER_BAND_SELECT_THRESHOLD = 5.0;
 
     private SetProperty<DiagramItem> selectedItems = new SimpleSetProperty<>(this, "selectedItems", FXCollections.observableSet());
 
@@ -64,7 +68,7 @@ public class Diagram extends Pane {
         return itemsCopied.get();
     }
 
-    private Map<DiagramItem, InitialState> initialStateMap = new HashMap<>();
+    private Map<DiagramItem, ItemState> itemStateMap = new HashMap<>();
     private Map<String, ItemCoord> selectedItemsPositionDeltas = new HashMap<>();
     private List<DiagramItem> dragCopyItems = new ArrayList<>();
     private boolean rubberBandSelect = false;
@@ -73,6 +77,7 @@ public class Diagram extends Pane {
     private boolean isDragCopying = false;
     private double rubberBandInitX, rubberBandInitY;
     private double mouseX, mouseY;
+    private Bounds initBounds;
     private Rectangle rubberBandRect;
 
     public Diagram() {
@@ -130,13 +135,9 @@ public class Diagram extends Pane {
         getChildren().add(item);
     }
 
-    //TODO: removeItem() to uninstall event handlers
     public void removeItems(List<DiagramItem> items) {
-        Iterator<DiagramItem> itemIterator = items.iterator();
-        while (itemIterator.hasNext()) {
-            DiagramItem nextItem = itemIterator.next();
+        for (DiagramItem nextItem : items) {
             DiagramItemRegistry.removeItem(nextItem.getId());
-            itemIterator.remove();
             this.getChildren().remove(nextItem);
         }
     }
@@ -153,7 +154,7 @@ public class Diagram extends Pane {
         for (DiagramItem item : items) {
             item.setSelected(false);
             selectedItems.remove(item);
-            initialStateMap.remove(item);
+            itemStateMap.remove(item);
         }
     }
 
@@ -165,7 +166,7 @@ public class Diagram extends Pane {
         // Also hide the borders of the items
         selectedItems.forEach(item -> item.setSelected(false));
         selectedItems.clear();
-        initialStateMap.clear();
+        itemStateMap.clear();
     }
 
     public void copySelected() {
@@ -230,7 +231,7 @@ public class Diagram extends Pane {
 
     public void deleteSelected() {
         Command command = new CompoundCommand(Arrays.asList(
-                new DeleteCommand(this, new ArrayList<>(selectedItems)),
+                new DeleteItemsCommand(this, new ArrayList<>(selectedItems)),
                 new PropertyChangeCommand<>(itemsCopied, false)
         ));
         ChangeManager.getInstance().putCommand(command);
@@ -264,8 +265,10 @@ public class Diagram extends Pane {
             if (dragboard.hasString()) {
                 DiagramItem item = PaletteItemRegistry.getItem(dragboard.getString());
                 if (item != null) {
-                    addItem(item);
                     item.relocate(event.getX(), event.getY());
+                    Command addCommand = new AddItemsCommand(this, Arrays.asList(item));
+                    ChangeManager.getInstance().putCommand(addCommand);
+                    addCommand.execute();
                     success = true;
                 }
             }
@@ -304,7 +307,7 @@ public class Diagram extends Pane {
 
             // Move current item
             if (!isMultiMove) {
-                initialStateMap.put(item, new InitialState(
+                itemStateMap.put(item, new ItemState(
                         mouseEvent.getSceneX(),
                         mouseEvent.getSceneY(),
                         item.getTranslateX(),
@@ -313,7 +316,7 @@ public class Diagram extends Pane {
             }
             // Move all selected items
             else {
-                selectedItems.forEach(selectedItem -> initialStateMap.put(selectedItem, new InitialState(
+                selectedItems.forEach(selectedItem -> itemStateMap.put(selectedItem, new ItemState(
                         mouseEvent.getSceneX(),
                         mouseEvent.getSceneY(),
                         selectedItem.getTranslateX(),
@@ -326,41 +329,58 @@ public class Diagram extends Pane {
             if (!isDragCopying) {
                 setCursor(Cursor.MOVE);
                 MouseEvent mouseEvent = event.getMouseEvent();
-                if (!isMultiMove) {
-                    InitialState initState = initialStateMap.get(item);
-                    item.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
-                    item.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
-                } else {
-                    initialStateMap.entrySet().forEach(entry -> {
-                        DiagramItem selectedItem = entry.getKey();
-                        InitialState initState = entry.getValue();
 
-                        selectedItem.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
-                        selectedItem.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
-                    });
-                }
+                Collection<DiagramItem> itemsToMove = !isMultiMove ? Collections.singletonList(item) : itemStateMap.keySet();
+
+                itemsToMove.forEach(itemToMove -> {
+                    ItemState initState = itemStateMap.get(itemToMove);
+                    double currentTranslateX = initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX;
+                    double currentTranslateY = initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY;
+                    initState.currentTranslateX = currentTranslateX;
+                    initState.currentTranslateY = currentTranslateY;
+
+                    itemToMove.setTranslateX(currentTranslateX);
+                    itemToMove.setTranslateY(currentTranslateY);
+                });
             }
             event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.MOVE_FINISHED, event -> {
             setCursor(Cursor.DEFAULT);
             isMultiMove = false;
-            initialStateMap.clear();
+            Map<String, ItemCoord> itemDeltas = new HashMap<>();
+            for (Map.Entry<DiagramItem, ItemState> itemState : itemStateMap.entrySet()) {
+                ItemState state = itemState.getValue();
+                itemDeltas.put(itemState.getKey().getId(), new ItemCoord(state.currentTranslateX, state.currentTranslateY));
+            }
+
+            // We are registering the command without running it because the relocation is already done at this point
+            ChangeManager.getInstance().putCommand(new RelocateItemsCommand(itemDeltas));
+
+            itemStateMap.clear();
             event.consume();
         });
-
+        item.addEventHandler(DiagramItemMouseEvent.RESIZE_STARTED, event -> {
+            initBounds = item.getBoundsInParent();
+            event.consume();
+        });
+        item.addEventHandler(DiagramItemMouseEvent.RESIZE_FINISHED, event -> {
+            // We are registering the command without running it because the resizing is already done at this point
+            ChangeManager.getInstance().putCommand(new ResizeItemCommand(item, initBounds, item.getBoundsInParent()));
+            event.consume();
+        });
         item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_STARTED, event -> {
             if (selectedItems.isEmpty()) {
                 dragCopyItems.add(item.copy());
             } else {
                 dragCopyItems.addAll(selectedItems.stream().map(DiagramItem::copy).collect(Collectors.toList()));
             }
-            initialStateMap.clear();
+            itemStateMap.clear();
             MouseEvent mouseEvent = event.getMouseEvent();
             dragCopyItems.forEach(copyItem -> {
                 DiagramItemRegistry.putItem(copyItem);
                 getChildren().add(copyItem);
-                initialStateMap.put(copyItem, new InitialState(
+                itemStateMap.put(copyItem, new ItemState(
                         mouseEvent.getSceneX(),
                         mouseEvent.getSceneY(),
                         copyItem.getTranslateX(),
@@ -372,9 +392,9 @@ public class Diagram extends Pane {
         item.addEventHandler(DiagramItemMouseEvent.DRAG_COPYING, event -> {
             isDragCopying = true;
             MouseEvent mouseEvent = event.getMouseEvent();
-            initialStateMap.entrySet().forEach(entry -> {
+            itemStateMap.entrySet().forEach(entry -> {
                 DiagramItem currentItem = entry.getKey();
-                InitialState initState = entry.getValue();
+                ItemState initState = entry.getValue();
 
                 currentItem.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
                 currentItem.setTranslateY(initState.initTranslateY + mouseEvent.getSceneY() - initState.initMouseY);
@@ -384,6 +404,10 @@ public class Diagram extends Pane {
         });
         item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_FINISHED, event -> {
             isDragCopying = false;
+
+            // We are just registering the command here, not executing it because items are already copied at this point
+            ChangeManager.getInstance().putCommand(new AddItemsCommand(this, dragCopyItems));
+
             dragCopyItems.forEach(this::installItemEventHandlers);
             dragCopyItems.clear();
             event.consume();
@@ -452,36 +476,40 @@ public class Diagram extends Pane {
             if (event.getButton() != MouseButton.SECONDARY) {
                 rubberBandInitX = event.getX();
                 rubberBandInitY = event.getY();
-
-                rubberBandRect = new Rectangle(rubberBandInitX, rubberBandInitY, 0, 0);
-                rubberBandRect.setStroke(Color.GRAY);
-                rubberBandRect.setStrokeWidth(0.5);
-                rubberBandRect.getStrokeDashArray().addAll(6.0);
-                rubberBandRect.setStrokeLineCap(StrokeLineCap.ROUND);
-                rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.3));
-                getChildren().add(rubberBandRect);
             }
             event.consume();
         });
 
         this.setOnMouseDragged(event -> {
             if (event.getButton() != MouseButton.SECONDARY) {
-                rubberBandSelect = true;
                 double offsetX = event.getX() - rubberBandInitX;
                 double offsetY = event.getY() - rubberBandInitY;
 
-                if (offsetX > 0) {
-                    rubberBandRect.setWidth(offsetX);
+                if (!rubberBandSelect) {
+                    if (offsetX > RUBBER_BAND_SELECT_THRESHOLD || offsetY > RUBBER_BAND_SELECT_THRESHOLD) {
+                        rubberBandSelect = true;
+                        rubberBandRect = new Rectangle(rubberBandInitX, rubberBandInitY, 0, 0);
+                        rubberBandRect.setStroke(Color.GRAY);
+                        rubberBandRect.setStrokeWidth(0.5);
+                        rubberBandRect.getStrokeDashArray().addAll(6.0);
+                        rubberBandRect.setStrokeLineCap(StrokeLineCap.ROUND);
+                        rubberBandRect.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.3));
+                        getChildren().add(rubberBandRect);
+                    }
                 } else {
-                    rubberBandRect.setX(event.getX());
-                    rubberBandRect.setWidth(rubberBandInitX - rubberBandRect.getX());
-                }
+                    if (offsetX > 0) {
+                        rubberBandRect.setWidth(offsetX);
+                    } else {
+                        rubberBandRect.setX(event.getX());
+                        rubberBandRect.setWidth(rubberBandInitX - rubberBandRect.getX());
+                    }
 
-                if (offsetY > 0) {
-                    rubberBandRect.setHeight(offsetY);
-                } else {
-                    rubberBandRect.setY(event.getY());
-                    rubberBandRect.setHeight(rubberBandInitY - rubberBandRect.getY());
+                    if (offsetY > 0) {
+                        rubberBandRect.setHeight(offsetY);
+                    } else {
+                        rubberBandRect.setY(event.getY());
+                        rubberBandRect.setHeight(rubberBandInitY - rubberBandRect.getY());
+                    }
                 }
             }
             event.consume();
@@ -524,13 +552,15 @@ public class Diagram extends Pane {
         });
     }
 
-    private static class InitialState {
+    private static class ItemState {
         private final double initMouseX;
         private final double initMouseY;
         private final double initTranslateX;
         private final double initTranslateY;
+        private double currentTranslateX;
+        private double currentTranslateY;
 
-        InitialState(final double initMouseX, final double initMouseY, final double initTranslateX, final double initTranslateY) {
+        ItemState(final double initMouseX, final double initMouseY, final double initTranslateX, final double initTranslateY) {
             this.initMouseX = initMouseX;
             this.initMouseY = initMouseY;
             this.initTranslateX = initTranslateX;
