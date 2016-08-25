@@ -1,1 +1,1 @@
-1. Resize Undo/Redo - item not restored correctly
+1. Subsequent Paste operations after first would paste all items in the position of firstly pasted item

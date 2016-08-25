@@ -71,13 +71,13 @@ public class Diagram extends Pane {
     private Map<DiagramItem, ItemState> itemStateMap = new HashMap<>();
     private Map<String, ItemCoord> selectedItemsPositionDeltas = new HashMap<>();
     private List<DiagramItem> dragCopyItems = new ArrayList<>();
+    private ResizeItemCommand.ResizeState originalResizeState;
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
     private boolean isItemEditing = false;
     private boolean isDragCopying = false;
     private double rubberBandInitX, rubberBandInitY;
     private double mouseX, mouseY;
-    private Bounds initBounds;
     private Rectangle rubberBandRect;
 
     public Diagram() {
@@ -362,12 +362,15 @@ public class Diagram extends Pane {
             event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.RESIZE_STARTED, event -> {
-            initBounds = item.getBoundsInParent();
+            originalResizeState = new ResizeItemCommand.ResizeState(item.getTranslateX(), item.getTranslateY(),
+                    item.getWidth(), item.getHeight());
             event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.RESIZE_FINISHED, event -> {
             // We are registering the command without running it because the resizing is already done at this point
-            ChangeManager.getInstance().putCommand(new ResizeItemCommand(item, initBounds, item.getBoundsInParent()));
+            ChangeManager.getInstance().putCommand(new ResizeItemCommand(item, originalResizeState,
+                    new ResizeItemCommand.ResizeState(item.getTranslateX(), item.getTranslateY(),
+                            item.getWidth(), item.getHeight())));
             event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_STARTED, event -> {

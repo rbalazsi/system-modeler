@@ -1,7 +1,6 @@
 package com.robertbalazsi.systemmodeler.command;
 
 import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
-import javafx.geometry.Bounds;
 
 /**
  * Encapsulates the undoable resizing of diagram items.
@@ -9,28 +8,42 @@ import javafx.geometry.Bounds;
 public class ResizeItemCommand implements Command {
 
     private final DiagramItem item;
-    private final Bounds originalBounds;
-    private final Bounds newBounds;
+    private final ResizeState originalState;
+    private final ResizeState newState;
 
-    public ResizeItemCommand(DiagramItem item, Bounds originalBounds, Bounds newBounds) {
+    public ResizeItemCommand(DiagramItem item, ResizeState originalState, ResizeState newState) {
         this.item = item;
-        this.originalBounds = originalBounds;
-        this.newBounds = newBounds;
+        this.originalState = originalState;
+        this.newState = newState;
     }
 
     @Override
     public void execute() {
-        item.setLayoutX(newBounds.getMinX());
-        item.setLayoutY(newBounds.getMinY());
-        item.setWidth(newBounds.getWidth());
-        item.setHeight(newBounds.getHeight());
+        item.setTranslateX(newState.translateX);
+        item.setTranslateY(newState.translateY);
+        item.setWidth(newState.width);
+        item.setHeight(newState.height);
     }
 
     @Override
     public void undo() {
-        item.setLayoutX(originalBounds.getMinX());
-        item.setLayoutY(originalBounds.getMinY());
-        item.setWidth(originalBounds.getWidth());
-        item.setHeight(originalBounds.getHeight());
+        item.setTranslateX(originalState.translateX);
+        item.setTranslateY(originalState.translateY);
+        item.setWidth(originalState.width);
+        item.setHeight(originalState.height);
+    }
+
+    public static class ResizeState {
+        private final double translateX;
+        private final double translateY;
+        private final double width;
+        private final double height;
+
+        public ResizeState(double translateX, double translateY, double width, double height) {
+            this.translateX = translateX;
+            this.translateY = translateY;
+            this.width = width;
+            this.height = height;
+        }
     }
 }
