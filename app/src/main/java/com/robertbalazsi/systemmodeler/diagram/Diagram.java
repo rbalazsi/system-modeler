@@ -127,6 +127,13 @@ public class Diagram extends Pane {
             mouseY = event.getY();
             event.consume();
         });
+
+        this.setOnKeyPressed(event -> {
+            if (event.isControlDown() && event.getCode() == KeyCode.V) {
+                pasteItems(false);
+                event.consume();
+            }
+        });
     }
 
     public void addItem(DiagramItem item) {
@@ -414,6 +421,7 @@ public class Diagram extends Pane {
 
             dragCopyItems.forEach(this::installItemEventHandlers);
             dragCopyItems.clear();
+            itemStateMap.clear();
             event.consume();
         });
         item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event -> {
