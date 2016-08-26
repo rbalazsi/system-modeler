@@ -5,8 +5,8 @@
  - parent item decides what to do with them
      => most probably they will form paths of some shape to draw
 
-2. Arrows (REQUIRES Vector graphics)
- - another category of items
+2. Linking diagram items
+ - arrows as another category of items
  - control points define the ends, they can be moved freely
  - expose a thickness property
  - other control points can also be added to make it free-form (not necessarily a straight line)
@@ -14,3 +14,52 @@
  - can link two items together
     => if item moves/resizes, they need to be updated/redrawn as well
  - multiple arrow styles (see MS Visio for ideas)
+
+3. Property editors for items
+ - property dialog box on double-click
+ - common buttons on Toolbar: font, text alignment (H/V), fill & text color, paddings, etc.
+
+4. Panning & Zooming on the diagram
+ - create a zoomable ruler around the diagram
+ - when dragging the diagram, it would pan to a previously non-clipped area (outside of current diagram view)
+ - create a H/V scrollbar which is enabled when there are items in non-clipped area
+
+5. UML item types
+ - UML class diagram: class (including abstract), interface, enum
+ - UML associations: association (uni/bidirectional), inheritance, interface implementation, aggregation, composition
+    -> naming association roles, multiplicity
+ - For class:
+    -> access scopes for fields and methods: public, private, protected, default-scoped field types
+    -> static modifier for fields
+ - For interface: methods, constants
+ - For enum: literals, fields??, constructors?? (review if UML standard supports it)
+
+6. Associate a domain model for UML item types
+ - domain class for each UML item type
+
+7. Loading and saving diagrams
+ - define an XML file format that stores
+    -> items positions on diagram
+    -> all their properties
+ - create a serializer
+ - .mxml file extension
+
+***** RELEASE CUT 1. *****
+
+
+7. Aligning items
+ - H/V align items relative to each other (first selected, last selected, get ideas from MS Visio)
+ - H/V align items relative to a custom ruler
+
+8. Item hierarchies
+ - Composite pattern for hierarchy
+ - Project structure view populated with the hierarchy
+
+9. Project Structure View - basic functions
+ - clicking on an item will navigate to that sub-diagram
+ - deleting an item will ask for confirmation to delete the whole sub-diagram
+ - context menu with: delete
+ - deletion is undoable/redoable
+ - Shift-Click selects all other items (and sub-items) from previously selected item to currently selected one
+ - Ctrl-Click will toggle between adding/removing the currently selected item to selection
+ - when Ctrl-Shift selecting, focus would remain on previously selected item
