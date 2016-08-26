@@ -1,19 +1,11 @@
-1. Undo/Redo support
- - apply the Command design pattern for each operation
- - install Undo and Redo to Edit menu
-    -> Undo is enabled if there was at least one operation already made
-    -> Redo is enabled if there was at least one operation already undone
- - shortcuts: Ctrl-Z for Undo, Ctrl-Shift-Z for Redo
- - if, after Undo, other operation "path" is chosen, the Redo stack is cleared out
-
-2. Vector graphics
+1. Vector graphics
  - define a custom control point
  - moving it modifies the bounded box of the parent item
      => need to recalculate and resize parent accordingly
  - parent item decides what to do with them
      => most probably they will form paths of some shape to draw
 
-3. Arrows (REQUIRES Vector graphics)
+2. Arrows (REQUIRES Vector graphics)
  - another category of items
  - control points define the ends, they can be moved freely
  - expose a thickness property

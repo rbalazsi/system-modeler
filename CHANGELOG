@@ -32,3 +32,13 @@ ISSUES:
     -> when items are selected, holding down Shift and dragging the mouse will duplicate the selected items
     -> only if Shift is still down on mouse released event, otherwise operation is cancelled
     -> copies maintain the positional relationships of selected items
+
+
+# 08-26-2016 Undo/Redo support
+ - currently supported: copying to clipboard, selecting, pasting, drag-copying, adding, deleting, moving, resizing items
+ - apply the Command design pattern for each supported operation
+ - install Undo and Redo to Edit menu
+    -> Undo is enabled if there was at least one operation already made
+    -> Redo is enabled if there was at least one operation already undone
+ - shortcuts: Ctrl-Z for Undo, Ctrl-Shift-Z for Redo
+ - if, after Undo, other operation "path" is chosen, the Redo stack is cleared out
