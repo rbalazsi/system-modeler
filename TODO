@@ -1,4 +1,33 @@
-* Create an item type (e.g. ModelItem) that incorporates:
- - a diagram item, as "view"
- - a domain object, as "entity"
- - one or more associations to other model items
+* Compound visual
+ - used for treating related visuals as a group
+ - there can be a primary visual (but it's not mandatory), moving it moves all secondary visuals (but not vice versa)
+ - one useful application is representing associations later: moving the arrow will move the texts also
+
+* Model usage prototyping
+ - abstract VisualizedModelItem -> VisualizedComponent, VisualizedSubSystem, VisualizedInteraction
+
+// Root system visualized
+SubSystem rootSystem = new SubSystem("My system");
+VisualizedSubSystem root = new VisualizedSubSystem(rootSystem, new Rectangle(200, 80));
+// VisualizedSubSystem creates an inner diagram, this Rectangle is its "collapsed" representation
+
+// The model
+Model model = new Model("My project");
+model.setRoot(root); // setRoot(VisualizedModelItem item)
+// API:
+// VisualizedModelItem getById( id:String )
+// Collection<VisualizedModelItem> getByName( name:String )
+// Collection<VisualizedModelItem> getByVisualType( clazz:Class )
+
+// Adding a subsystem and a component to root system
+root.addSubSystem(new VisualizedSubSystem(new SubSystem("Sub system #1"), new RoundedRectangle(100, 50)));
+VisualizedComponent comp1 = new VisualizedComponent(new Component("Component #1", new Rectangle(100, 50));
+VisualizedComponent comp2 = new VisualizedComponent(new Component("Component #2", new Circle(200));
+root.addComponent(comp1);
+root.addComponent(comp2);
+
+// Linking model items
+comp1.linkTo(comp2, new VisualizedInteraction(new Interaction("my association"), new Arrow(5.0))); // 5.0 = arrow thickness
+// linkFrom(..), link(..) - bidirectional
+
+* Idea! association role names represented as Label visuals, the association itself represented as a CompoundVisual
