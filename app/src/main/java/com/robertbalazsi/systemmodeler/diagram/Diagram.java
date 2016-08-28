@@ -11,7 +11,7 @@ import com.robertbalazsi.systemmodeler.command.RelocateItemsCommand;
 import com.robertbalazsi.systemmodeler.command.ResizeItemCommand;
 import com.robertbalazsi.systemmodeler.command.SelectionChangeCommand;
 import com.robertbalazsi.systemmodeler.global.ChangeManager;
-import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
+import com.robertbalazsi.systemmodeler.global.VisualRegistry;
 import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SetProperty;
@@ -48,13 +48,13 @@ public class Diagram extends Pane {
     private static final String CLIPBOARD_ITEMS_PREFIX = "_items:";
     private static final double RUBBER_BAND_SELECT_THRESHOLD = 5.0;
 
-    private SetProperty<DiagramItem> selectedItems = new SimpleSetProperty<>(this, "selectedItems", FXCollections.observableSet());
+    private SetProperty<Visual> selectedItems = new SimpleSetProperty<>(this, "selectedItems", FXCollections.observableSet());
 
-    public SetProperty<DiagramItem> selectedItemsProperty() {
+    public SetProperty<Visual> selectedItemsProperty() {
         return selectedItems;
     }
 
-    public ObservableSet<DiagramItem> getSelectedItems() {
+    public ObservableSet<Visual> getSelectedItems() {
         return selectedItems.get();
     }
 
@@ -68,9 +68,9 @@ public class Diagram extends Pane {
         return itemsCopied.get();
     }
 
-    private Map<DiagramItem, ItemState> itemStateMap = new HashMap<>();
+    private Map<Visual, ItemState> itemStateMap = new HashMap<>();
     private Map<String, ItemCoord> selectedItemsPositionDeltas = new HashMap<>();
-    private List<DiagramItem> dragCopyItems = new ArrayList<>();
+    private List<Visual> dragCopyItems = new ArrayList<>();
     private ResizeItemCommand.ResizeState originalResizeState;
     private boolean rubberBandSelect = false;
     private boolean isMultiMove = false;
@@ -136,36 +136,36 @@ public class Diagram extends Pane {
         });
     }
 
-    public void addItem(DiagramItem item) {
-        DiagramItemRegistry.putItem(item);
+    public void addItem(Visual item) {
+        VisualRegistry.put(item);
         installItemEventHandlers(item);
         getChildren().add(item);
     }
 
-    public void removeItems(List<DiagramItem> items) {
-        for (DiagramItem nextItem : items) {
-            DiagramItemRegistry.removeItem(nextItem.getId());
+    public void removeItems(List<Visual> items) {
+        for (Visual nextItem : items) {
+            VisualRegistry.remove(nextItem.getId());
             this.getChildren().remove(nextItem);
         }
     }
 
-    public void selectItems(Collection<DiagramItem> items) {
-        for (DiagramItem item : items) {
+    public void selectItems(Collection<Visual> items) {
+        for (Visual item : items) {
             item.setSelected(true);
             item.requestFocus();
             selectedItems.add(item);
         }
     }
 
-    public void deselectItems(Collection<DiagramItem> items) {
-        for (DiagramItem item : items) {
+    public void deselectItems(Collection<Visual> items) {
+        for (Visual item : items) {
             item.setSelected(false);
             selectedItems.remove(item);
             itemStateMap.remove(item);
         }
     }
 
-    public boolean isSelected(DiagramItem item) {
+    public boolean isSelected(Visual item) {
         return selectedItems.contains(item);
     }
 
@@ -184,7 +184,7 @@ public class Diagram extends Pane {
         // all selected items
         double leftX = Double.MAX_VALUE, topY = Double.MAX_VALUE;
         double rightX = Double.MIN_VALUE, bottomY = Double.MIN_VALUE;
-        for (DiagramItem item : selectedItems) {
+        for (Visual item : selectedItems) {
             if (item.getLayoutX() < leftX) {
                 leftX = item.getLayoutX();
             }
@@ -201,7 +201,7 @@ public class Diagram extends Pane {
 
         double deltaX = leftX + (rightX - leftX) / 2;
         double deltaY = topY + (bottomY - topY) / 2;
-        for (DiagramItem item : selectedItems) {
+        for (Visual item : selectedItems) {
             joiner.add(item.getId());
             selectedItemsPositionDeltas.put(item.getId(), new ItemCoord(item.getLayoutX() - deltaX,
                     item.getLayoutY() - deltaY));
@@ -270,7 +270,7 @@ public class Diagram extends Pane {
             Dragboard dragboard = event.getDragboard();
             boolean success = false;
             if (dragboard.hasString()) {
-                DiagramItem item = PaletteItemRegistry.getItem(dragboard.getString());
+                Visual item = PaletteItemRegistry.getItem(dragboard.getString());
                 if (item != null) {
                     item.relocate(event.getX(), event.getY());
                     Command addCommand = new AddItemsCommand(this, Collections.singletonList(item));
@@ -284,13 +284,13 @@ public class Diagram extends Pane {
         });
     }
 
-    private void installItemEventHandlers(DiagramItem item) {
-        item.addEventHandler(DiagramItemMouseEvent.SELECTED, event -> {
+    private void installItemEventHandlers(Visual item) {
+        item.addEventHandler(VisualMouseEvent.SELECTED, event -> {
             MouseEvent mouseEvent = event.getMouseEvent();
             Command selectionCommand = null;
 
-            List<DiagramItem> selectedItems = new ArrayList<>();
-            List<DiagramItem> deselectedItems = new ArrayList<>();
+            List<Visual> selectedItems = new ArrayList<>();
+            List<Visual> deselectedItems = new ArrayList<>();
             if (!mouseEvent.isShiftDown() && !mouseEvent.isControlDown()) {
                 deselectedItems.addAll(this.selectedItems);
                 selectedItems.add(item);
@@ -308,7 +308,7 @@ public class Diagram extends Pane {
 
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.MOVE_STARTED, event -> {
+        item.addEventHandler(VisualMouseEvent.MOVE_STARTED, event -> {
             isMultiMove = isSelected(item);
             MouseEvent mouseEvent = event.getMouseEvent();
 
@@ -332,12 +332,12 @@ public class Diagram extends Pane {
             }
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.MOVING, event -> {
+        item.addEventHandler(VisualMouseEvent.MOVING, event -> {
             if (!isDragCopying) {
                 setCursor(Cursor.MOVE);
                 MouseEvent mouseEvent = event.getMouseEvent();
 
-                Collection<DiagramItem> itemsToMove = !isMultiMove ? Collections.singletonList(item) : itemStateMap.keySet();
+                Collection<Visual> itemsToMove = !isMultiMove ? Collections.singletonList(item) : itemStateMap.keySet();
 
                 itemsToMove.forEach(itemToMove -> {
                     ItemState initState = itemStateMap.get(itemToMove);
@@ -352,11 +352,11 @@ public class Diagram extends Pane {
             }
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.MOVE_FINISHED, event -> {
+        item.addEventHandler(VisualMouseEvent.MOVE_FINISHED, event -> {
             setCursor(Cursor.DEFAULT);
             isMultiMove = false;
             Map<String, RelocateItemsCommand.ItemTranslateState> itemDeltas = new HashMap<>();
-            for (Map.Entry<DiagramItem, ItemState> itemState : itemStateMap.entrySet()) {
+            for (Map.Entry<Visual, ItemState> itemState : itemStateMap.entrySet()) {
                 ItemState state = itemState.getValue();
                 itemDeltas.put(itemState.getKey().getId(), new RelocateItemsCommand.ItemTranslateState(
                         state.initTranslateX, state.initTranslateY, state.currentTranslateX, state.currentTranslateY));
@@ -368,28 +368,28 @@ public class Diagram extends Pane {
             itemStateMap.clear();
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.RESIZE_STARTED, event -> {
+        item.addEventHandler(VisualMouseEvent.RESIZE_STARTED, event -> {
             originalResizeState = new ResizeItemCommand.ResizeState(item.getTranslateX(), item.getTranslateY(),
                     item.getWidth(), item.getHeight());
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.RESIZE_FINISHED, event -> {
+        item.addEventHandler(VisualMouseEvent.RESIZE_FINISHED, event -> {
             // We are registering the command without running it because the resizing is already done at this point
             ChangeManager.getInstance().putCommand(new ResizeItemCommand(item, originalResizeState,
                     new ResizeItemCommand.ResizeState(item.getTranslateX(), item.getTranslateY(),
                             item.getWidth(), item.getHeight())));
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_STARTED, event -> {
+        item.addEventHandler(VisualMouseEvent.DRAG_COPY_STARTED, event -> {
             if (selectedItems.isEmpty()) {
                 dragCopyItems.add(item.copy());
             } else {
-                dragCopyItems.addAll(selectedItems.stream().map(DiagramItem::copy).collect(Collectors.toList()));
+                dragCopyItems.addAll(selectedItems.stream().map(Visual::copy).collect(Collectors.toList()));
             }
             itemStateMap.clear();
             MouseEvent mouseEvent = event.getMouseEvent();
             dragCopyItems.forEach(copyItem -> {
-                DiagramItemRegistry.putItem(copyItem);
+                VisualRegistry.put(copyItem);
                 getChildren().add(copyItem);
                 itemStateMap.put(copyItem, new ItemState(
                         mouseEvent.getSceneX(),
@@ -400,11 +400,11 @@ public class Diagram extends Pane {
             });
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPYING, event -> {
+        item.addEventHandler(VisualMouseEvent.DRAG_COPYING, event -> {
             isDragCopying = true;
             MouseEvent mouseEvent = event.getMouseEvent();
             itemStateMap.entrySet().forEach(entry -> {
-                DiagramItem currentItem = entry.getKey();
+                Visual currentItem = entry.getKey();
                 ItemState initState = entry.getValue();
 
                 currentItem.setTranslateX(initState.initTranslateX + mouseEvent.getSceneX() - initState.initMouseX);
@@ -413,7 +413,7 @@ public class Diagram extends Pane {
 
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_FINISHED, event -> {
+        item.addEventHandler(VisualMouseEvent.DRAG_COPY_FINISHED, event -> {
             isDragCopying = false;
 
             // We are just registering the command here, not executing it because items are already copied at this point
@@ -424,13 +424,13 @@ public class Diagram extends Pane {
             itemStateMap.clear();
             event.consume();
         });
-        item.addEventHandler(DiagramItemMouseEvent.DRAG_COPY_CANCELLED, event -> {
+        item.addEventHandler(VisualMouseEvent.DRAG_COPY_CANCELLED, event -> {
             isDragCopying = false;
             removeItems(dragCopyItems);
             event.consume();
         });
 
-        item.addEventHandler(DiagramItemMouseEvent.TEXT_EDITING, event -> {
+        item.addEventHandler(VisualMouseEvent.TEXT_EDITING, event -> {
             isItemEditing = true;
             itemTextEditor.setOnAction(actionEvent -> {
                 String enteredText = itemTextEditor.getText();
@@ -448,7 +448,7 @@ public class Diagram extends Pane {
             getChildren().add(itemTextEditor);
             itemTextEditor.requestFocus();
         });
-        item.addEventHandler(DiagramItemMouseEvent.CONTEXT_MENU, event -> {
+        item.addEventHandler(VisualMouseEvent.CONTEXT_MENU, event -> {
             resetContextMenu();
             if (!selectedItems.isEmpty()) {
                 contextMenu.getItems().add(copyMenuItem());
@@ -533,21 +533,21 @@ public class Diagram extends Pane {
                     if (!event.isShiftDown() && !event.isControlDown()) {
                         clearSelection();
                     }
-                    List<DiagramItem> selectedItems = new ArrayList<>();
-                    List<DiagramItem> deselectedItems = new ArrayList<>();
-                    for (Node item : getChildren().stream().filter(node -> node instanceof DiagramItem).collect(Collectors.toList())) {
-                        DiagramItem diagramItem = (DiagramItem) item;
-                        if (rubberBandRect.getBoundsInParent().contains(diagramItem.getBoundsInParent())) {
+                    List<Visual> selectedItems = new ArrayList<>();
+                    List<Visual> deselectedItems = new ArrayList<>();
+                    for (Node item : getChildren().stream().filter(node -> node instanceof Visual).collect(Collectors.toList())) {
+                        Visual visual = (Visual) item;
+                        if (rubberBandRect.getBoundsInParent().contains(visual.getBoundsInParent())) {
                             if (event.isShiftDown()) {
-                                selectedItems.add(diagramItem);
+                                selectedItems.add(visual);
                             } else if (event.isControlDown()) {
-                                if (isSelected(diagramItem)) {
-                                    deselectedItems.add(diagramItem);
+                                if (isSelected(visual)) {
+                                    deselectedItems.add(visual);
                                 } else {
-                                    selectedItems.add(diagramItem);
+                                    selectedItems.add(visual);
                                 }
                             } else {
-                                selectedItems.add(diagramItem);
+                                selectedItems.add(visual);
                             }
                         }
                     }

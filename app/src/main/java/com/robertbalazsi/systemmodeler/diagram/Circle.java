@@ -14,7 +14,7 @@ import java.util.Collection;
 /**
  * A circle on a diagram.
  */
-public class Circle extends DiagramItem {
+public class Circle extends Visual {
 
     private DoubleProperty diameter = new SimpleDoubleProperty(this, "diameter");
 
@@ -49,7 +49,7 @@ public class Circle extends DiagramItem {
     }
 
     @Override
-    public DiagramItem copy() {
+    public Visual copy() {
         Circle circle = new Circle(getDiameter());
         baseCopy(this, circle);
         return circle;

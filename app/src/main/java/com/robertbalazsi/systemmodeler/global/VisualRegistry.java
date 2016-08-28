@@ -1,18 +1,18 @@
 package com.robertbalazsi.systemmodeler.global;
 
-import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
+import com.robertbalazsi.systemmodeler.diagram.Visual;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global registry of diagram items. IDs are automatically generated if needed. Items are stored in a map and can be retrieved by ID.
+ * Global registry of visuals. IDs are automatically generated if needed. Visuals are stored in a map and can be retrieved by ID.
  */
-public class DiagramItemRegistry {
-    private static final Map<String, DiagramItem> itemsMap = new HashMap<>();
+public class VisualRegistry {
+    private static final Map<String, Visual> itemsMap = new HashMap<>();
     private static long idCtr = 0;
 
-    public static void putItem(DiagramItem item) {
+    public static void put(Visual item) {
         String id = item.getId();
         if (itemsMap.containsKey(id)) {
             throw new IllegalArgumentException(String.format("Item with ID '%s' already exists.", id));
@@ -23,11 +23,11 @@ public class DiagramItemRegistry {
         itemsMap.put(item.getId(), item);
     }
 
-    public static DiagramItem getItem(String id) {
+    public static Visual get(String id) {
         return itemsMap.get(id);
     }
 
-    public static DiagramItem removeItem(String id) {
+    public static Visual remove(String id) {
         return itemsMap.remove(id);
     }
 }

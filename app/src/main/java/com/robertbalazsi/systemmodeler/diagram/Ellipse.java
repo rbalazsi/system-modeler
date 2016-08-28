@@ -12,7 +12,7 @@ import java.util.Collection;
 /**
  * An ellipse on a diagram.
  */
-public class Ellipse extends DiagramItem {
+public class Ellipse extends Visual {
 
     public Ellipse(double width, double height) {
         super(width, height);
@@ -46,7 +46,7 @@ public class Ellipse extends DiagramItem {
     }
 
     @Override
-    public DiagramItem copy() {
+    public Visual copy() {
         Ellipse ellipse = new Ellipse(getWidth(), getHeight());
         baseCopy(this, ellipse);
         return ellipse;

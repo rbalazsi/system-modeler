@@ -1,1 +1,4 @@
-[ALL DONE AT THIS POINT]
+* Create an item type (e.g. ModelItem) that incorporates:
+ - a diagram item, as "view"
+ - a domain object, as "entity"
+ - one or more associations to other model items

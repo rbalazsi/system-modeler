@@ -8,7 +8,7 @@ import java.util.Collections;
 /**
  * A label on a diagram.
  */
-public class Label extends DiagramItem {
+public class Label extends Visual {
 
     public Label(double width, double height) {
         super(width, height);
@@ -26,7 +26,7 @@ public class Label extends DiagramItem {
     }
 
     @Override
-    public DiagramItem copy() {
+    public Visual copy() {
         Label label = new Label(getWidth(), getHeight());
         baseCopy(this, label);
         return label;

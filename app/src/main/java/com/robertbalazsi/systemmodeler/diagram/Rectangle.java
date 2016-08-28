@@ -12,7 +12,7 @@ import java.util.Collection;
 /**
  * A rectangle on a diagram. 
  */
-public class Rectangle extends DiagramItem {
+public class Rectangle extends Visual {
 
     public Rectangle(double width, double height) {
         super(width, height);
@@ -46,7 +46,7 @@ public class Rectangle extends DiagramItem {
     }
 
     @Override
-    public DiagramItem copy() {
+    public Visual copy() {
         Rectangle rect = new Rectangle(getWidth(), getHeight());
         baseCopy(this, rect);
         return rect;

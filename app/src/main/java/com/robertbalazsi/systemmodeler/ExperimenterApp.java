@@ -11,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
@@ -50,11 +49,11 @@ public class ExperimenterApp extends Application {
         propertyPage.setContent(setupPropertyPageContents());
 
         //TODO: Add children
-        DiagramItem rectangle = new Rectangle(200, 100);
+        Visual rectangle = new Rectangle(200, 100);
         rectangle.setText("Rectangle");
         rectangle.setFont(new Font(30));
         rectangle.relocate(50, 100);
-        DiagramItem circle = new Circle(200);
+        Visual circle = new Circle(200);
         circle.setText("Circle");
         circle.relocate(350, 100);
 //        DiagramItem ellipse = new Ellipse(200, 100);

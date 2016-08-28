@@ -1,17 +1,17 @@
 package com.robertbalazsi.systemmodeler.command;
 
-import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
+import com.robertbalazsi.systemmodeler.diagram.Visual;
 
 /**
  * Encapsulates the undoable resizing of diagram items.
  */
 public class ResizeItemCommand implements Command {
 
-    private final DiagramItem item;
+    private final Visual item;
     private final ResizeState originalState;
     private final ResizeState newState;
 
-    public ResizeItemCommand(DiagramItem item, ResizeState originalState, ResizeState newState) {
+    public ResizeItemCommand(Visual item, ResizeState originalState, ResizeState newState) {
         this.item = item;
         this.originalState = originalState;
         this.newState = newState;

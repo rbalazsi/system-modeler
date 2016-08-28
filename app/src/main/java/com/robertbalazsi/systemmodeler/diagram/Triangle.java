@@ -12,7 +12,7 @@ import java.util.Collection;
 /**
  * A triangle on a diagram.
  */
-public class Triangle extends DiagramItem {
+public class Triangle extends Visual {
 
     public Triangle(double width, double height) {
         super(width, height);
@@ -52,7 +52,7 @@ public class Triangle extends DiagramItem {
     }
 
     @Override
-    public DiagramItem copy() {
+    public Visual copy() {
         Triangle triangle = new Triangle(getWidth(), getHeight());
         baseCopy(this, triangle);
         return triangle;

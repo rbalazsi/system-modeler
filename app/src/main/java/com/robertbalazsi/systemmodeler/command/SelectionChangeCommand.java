@@ -1,7 +1,7 @@
 package com.robertbalazsi.systemmodeler.command;
 
 import com.robertbalazsi.systemmodeler.diagram.Diagram;
-import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
+import com.robertbalazsi.systemmodeler.diagram.Visual;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,10 +12,10 @@ import java.util.Collection;
 public class SelectionChangeCommand implements Command {
 
     private final Diagram diagram;
-    private final Collection<DiagramItem> selectedItems;
-    private final Collection<DiagramItem> deselectedItems;
+    private final Collection<Visual> selectedItems;
+    private final Collection<Visual> deselectedItems;
 
-    public SelectionChangeCommand(Diagram diagram, Collection<DiagramItem> selectedItems, Collection<DiagramItem> deselectedItems) {
+    public SelectionChangeCommand(Diagram diagram, Collection<Visual> selectedItems, Collection<Visual> deselectedItems) {
         this.diagram = diagram;
         this.selectedItems = new ArrayList<>(selectedItems);
         this.deselectedItems = new ArrayList<>(deselectedItems);

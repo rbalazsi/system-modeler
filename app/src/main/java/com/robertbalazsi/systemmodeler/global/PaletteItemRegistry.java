@@ -14,7 +14,7 @@ public class PaletteItemRegistry {
     public static final String TRIANGLE = "Triangle";
     public static final String LABEL = "Label";
 
-    public static DiagramItem getItem(String name) {
+    public static Visual getItem(String name) {
         //TODO: make it polymorphic
         if (RECTANGLE.equals(name)) {
             return new Rectangle(200, 100);

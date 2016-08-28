@@ -1,7 +1,7 @@
 package com.robertbalazsi.systemmodeler.command;
 
-import com.robertbalazsi.systemmodeler.diagram.DiagramItem;
-import com.robertbalazsi.systemmodeler.global.DiagramItemRegistry;
+import com.robertbalazsi.systemmodeler.diagram.Visual;
+import com.robertbalazsi.systemmodeler.global.VisualRegistry;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public class RelocateItemsCommand implements Command {
     @Override
     public void execute() {
         for (Map.Entry<String, ItemTranslateState> itemDelta : itemDeltas.entrySet()) {
-            DiagramItem item = DiagramItemRegistry.getItem(itemDelta.getKey());
+            Visual item = VisualRegistry.get(itemDelta.getKey());
             ItemTranslateState state = itemDelta.getValue();
             item.setTranslateX(state.newTranslateX);
             item.setTranslateY(state.newTranslateY);
@@ -29,7 +29,7 @@ public class RelocateItemsCommand implements Command {
     @Override
     public void undo() {
         for (Map.Entry<String, ItemTranslateState> itemDelta : itemDeltas.entrySet()) {
-            DiagramItem item = DiagramItemRegistry.getItem(itemDelta.getKey());
+            Visual item = VisualRegistry.get(itemDelta.getKey());
             ItemTranslateState state = itemDelta.getValue();
             item.setTranslateX(state.originalTranslateX);
             item.setTranslateY(state.originalTranslateY);

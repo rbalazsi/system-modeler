@@ -14,7 +14,7 @@ import java.util.Collection;
 /**
  * A rounded rectangle on a diagram.
  */
-public class RoundedRectangle extends DiagramItem {
+public class RoundedRectangle extends Visual {
 
     private DoubleProperty arcWidth = new SimpleDoubleProperty(this, "arcWidth");
 
@@ -81,7 +81,7 @@ public class RoundedRectangle extends DiagramItem {
     }
 
     @Override
-    public DiagramItem copy() {
+    public Visual copy() {
         RoundedRectangle roundedRect = new RoundedRectangle(getWidth(), getHeight(), getArcWidth(), getArcHeight());
         baseCopy(this, roundedRect);
         return roundedRect;
