@@ -2,21 +2,27 @@ package com.robertbalazsi.systemmodeler.model;
 
 import com.robertbalazsi.systemmodeler.diagram.Visual;
 import com.robertbalazsi.systemmodeler.domain.Entity;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents an item on the model, consisting of a domain entity, its visual representation and its links to other items.
- * TODO implement
+ * Base class for representing an item on the model, consisting of a domain entity, its visual representation and its links to other items.
  */
-public class VisualizedModelItem {
+public abstract class VisualizedModelItem {
 
-    private Entity entity;
+    @Getter
+    @Setter
+    protected Entity entity;
 
-    private Visual visual;
+    @Getter
+    @Setter
+    protected Visual visual;
 
-    private List<Link> links = new ArrayList<>();
-
-    //TODO: linkWith(..).
+    public VisualizedModelItem(Entity entity, Visual visual) {
+        this.entity = entity;
+        this.visual = visual;
+    }
 }
