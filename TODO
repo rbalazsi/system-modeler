@@ -31,3 +31,8 @@ comp1.linkTo(comp2, new VisualizedInteraction(new Interaction("my association"),
 // linkFrom(..), link(..) - bidirectional
 
 * Idea! association role names represented as Label visuals, the association itself represented as a CompoundVisual
+
+comp1.linkTo(comp2, "left role", Multiplicity.of(1, UNBOUNDED), new Arrow(5.0))
+comp3.linkFrom(comp4, "right role", Multiplicity.of(UNBOUNDED, 1), new Arrow(5.0))
+comp5.link(comp6, "left role", "right role", Multiplicity.of(1, UNBOUNDED), new Arrow(5.0))
+comp3.unlink(comp4)
