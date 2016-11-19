@@ -182,25 +182,27 @@ public class Diagram extends Pane {
 
         // We store the position difference of each selected item relative to the center of the bounding box surrounding
         // all selected items
-        double leftX = Double.MAX_VALUE, topY = Double.MAX_VALUE;
-        double rightX = Double.MIN_VALUE, bottomY = Double.MIN_VALUE;
+        double leftMostX = Double.MAX_VALUE, topMostY = Double.MAX_VALUE;
+        double rightMostX = Double.MIN_VALUE, bottomMostY = Double.MIN_VALUE;
         for (Visual item : selectedItems) {
-            if (item.getLayoutX() < leftX) {
-                leftX = item.getLayoutX();
+            double leftX = item.getLayoutX() + item.getTranslateX();
+            double topY = item.getLayoutY() + item.getTranslateY();
+            if (leftX < leftMostX) {
+                leftMostX = leftX;
             }
-            if (item.getLayoutX() + item.getWidth() > rightX) {
-                rightX = item.getLayoutX() + item.getWidth();
+            if (leftX + item.getWidth() > rightMostX) {
+                rightMostX = leftX + item.getWidth();
             }
-            if (item.getLayoutY() < topY) {
-                topY = item.getLayoutY();
+            if (topY < topMostY) {
+                topMostY = topY;
             }
-            if (item.getLayoutY() + item.getHeight() > bottomY) {
-                bottomY = item.getLayoutY() + item.getHeight();
+            if (topY + item.getHeight() > bottomMostY) {
+                bottomMostY = topY + item.getHeight();
             }
         }
 
-        double deltaX = leftX + (rightX - leftX) / 2;
-        double deltaY = topY + (bottomY - topY) / 2;
+        double deltaX = leftMostX + (rightMostX - leftMostX) / 2;
+        double deltaY = topMostY + (bottomMostY - topMostY) / 2;
         for (Visual item : selectedItems) {
             joiner.add(item.getId());
             selectedItemsPositionDeltas.put(item.getId(), new ItemCoord(item.getLayoutX() - deltaX,
@@ -427,6 +429,8 @@ public class Diagram extends Pane {
         item.addEventHandler(VisualMouseEvent.DRAG_COPY_CANCELLED, event -> {
             isDragCopying = false;
             removeItems(dragCopyItems);
+            dragCopyItems.clear();
+            itemStateMap.clear();
             event.consume();
         });
 
