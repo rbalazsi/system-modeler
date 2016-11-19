@@ -30,6 +30,8 @@ subprojects {
             lombok         : '1.16.10',
             guava          : '19.0',
             commons_lang3  : '3.0',
+            spring         : '4.3.4.RELEASE',
+            spring_boot    : '1.4.2.RELEASE'
     ]
 
     dependencies {
@@ -38,6 +40,11 @@ subprojects {
         compile 'org.projectlombok:lombok:' + versions.lombok
         compile 'com.google.guava:guava:' + versions.guava
         compile 'org.apache.commons:commons-lang3:' + versions.commons_lang3
+        compile 'org.springframework:spring-core:' + versions.spring
+        compile 'org.springframework:spring-context:' + versions.spring
+        compile 'org.springframework:spring-beans:' + versions.spring
+        compile 'org.springframework.boot:spring-boot-starter:' + versions.spring_boot
+        testCompile 'org.springframework:spring-test:' + versions.spring
     }
 
     version = '1.0'
@@ -57,7 +64,7 @@ project('app') {
     // configure javafx-gradle-plugin
     jfx {
         verbose = true
-        mainClass = "com.robertbalazsi.systemmodeler.SystemModelerApp"
+        mainClass = "com.robertbalazsi.systemmodeler.app.SystemModelerApp"
         jfxAppOutputDir = "build/jfx/app"
         jfxMainAppJarName = "system-modeler.jar"
         deployDir = "src/main/deploy"

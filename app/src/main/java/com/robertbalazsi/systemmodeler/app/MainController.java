@@ -1,7 +1,6 @@
-package com.robertbalazsi.systemmodeler;
+package com.robertbalazsi.systemmodeler.app;
 
 import com.google.common.collect.Lists;
-import com.robertbalazsi.systemmodeler.command.Command;
 import com.robertbalazsi.systemmodeler.diagram.Diagram;
 import com.robertbalazsi.systemmodeler.global.ChangeManager;
 import com.robertbalazsi.systemmodeler.palette.PaletteItemCategory;
@@ -10,7 +9,9 @@ import com.robertbalazsi.systemmodeler.palette.PaletteView;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuItem;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -18,7 +19,11 @@ import java.util.ResourceBundle;
 /**
  * Controller for mainPanel.fxml.
  */
+@Component
 public class MainController implements Initializable {
+
+    @Resource
+    private ChangeManager changeManager;
 
     @FXML
     private PaletteView paletteView;
@@ -70,14 +75,14 @@ public class MainController implements Initializable {
     }
 
     private void setupMenus() {
-        undoMenuItem.disableProperty().bind(ChangeManager.getInstance().undoStackProperty().emptyProperty());
+        undoMenuItem.disableProperty().bind(changeManager.undoStackProperty().emptyProperty());
         undoMenuItem.setOnAction(event -> {
-            ChangeManager.getInstance().undoLast();
+            changeManager.undoLast();
         });
 
-        redoMenuItem.disableProperty().bind(ChangeManager.getInstance().redoStackProperty().emptyProperty());
+        redoMenuItem.disableProperty().bind(changeManager.redoStackProperty().emptyProperty());
         redoMenuItem.setOnAction(event -> {
-            ChangeManager.getInstance().redoLast();
+            changeManager.redoLast();
         });
 
         copyMenuItem.disableProperty().bind(diagram.selectedItemsProperty().emptyProperty());

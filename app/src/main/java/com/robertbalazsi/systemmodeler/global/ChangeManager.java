@@ -4,13 +4,13 @@ import com.robertbalazsi.systemmodeler.command.Command;
 import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import org.springframework.stereotype.Component;
 
 /**
  * Global component that manages the changes of a diagram, supporting Undo & Redo functionality.
  */
+@Component
 public class ChangeManager {
-
-    private static final ChangeManager INSTANCE = new ChangeManager();
 
     private ReadOnlyListProperty<Command> undoStack = new SimpleListProperty<>(this, "undoStack", FXCollections.observableArrayList());
 
@@ -22,14 +22,6 @@ public class ChangeManager {
 
     public ReadOnlyListProperty<Command> redoStackProperty() {
         return redoStack;
-    }
-
-    private ChangeManager() {
-        /* hidden - Singleton class */
-    }
-
-    public static ChangeManager getInstance() {
-        return INSTANCE;
     }
 
     public void putCommand(Command command) {

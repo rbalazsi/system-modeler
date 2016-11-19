@@ -21,6 +21,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -33,18 +34,27 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * The diagram containing the objects of the system.
  */
-public class Diagram extends Pane {
+@Component
+public class Diagram extends Pane implements Initializable {
 
-    private static TextField itemTextEditor = new TextField();
-    private static ContextMenu contextMenu = new ContextMenu();
+    @Resource
+    private ChangeManager changeManager;
+
+    private TextField itemTextEditor;
+    private ContextMenu contextMenu;
     private static final String CLIPBOARD_ITEMS_PREFIX = "_items:";
     private static final double RUBBER_BAND_SELECT_THRESHOLD = 5.0;
 
@@ -90,6 +100,12 @@ public class Diagram extends Pane {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        itemTextEditor = new TextField();
+        contextMenu = new ContextMenu();
 
         setupDragDropHandlers();
         setupRubberBandSelection();
@@ -110,7 +126,7 @@ public class Diagram extends Pane {
                 // We clean the selection if the mouse pointer wasn't in any of the items' bounds.
                 if (!mousePointerInAnyCanvasItem(event.getX(), event.getY())) {
                     Command clearSelectionCommand = new SelectionChangeCommand(this, Collections.emptyList(), selectedItems);
-                    ChangeManager.getInstance().putCommand(clearSelectionCommand);
+                    changeManager.putCommand(clearSelectionCommand);
                     clearSelectionCommand.execute();
                 }
                 if (isItemEditing) {
@@ -215,7 +231,7 @@ public class Diagram extends Pane {
                 new CopyToClipboardCommand(content),
                 new PropertyChangeCommand<>(itemsCopied, true)
         ));
-        ChangeManager.getInstance().putCommand(command);
+        changeManager.putCommand(command);
         command.execute();
     }
 
@@ -234,7 +250,7 @@ public class Diagram extends Pane {
         }
 
         Command pasteCommand = new PasteItemsCommand(this, itemCoords);
-        ChangeManager.getInstance().putCommand(pasteCommand);
+        changeManager.putCommand(pasteCommand);
         pasteCommand.execute();
     }
 
@@ -243,7 +259,7 @@ public class Diagram extends Pane {
                 new DeleteItemsCommand(this, new ArrayList<>(selectedItems)),
                 new PropertyChangeCommand<>(itemsCopied, false)
         ));
-        ChangeManager.getInstance().putCommand(command);
+        changeManager.putCommand(command);
         command.execute();
     }
 
@@ -276,7 +292,7 @@ public class Diagram extends Pane {
                 if (item != null) {
                     item.relocate(event.getX(), event.getY());
                     Command addCommand = new AddItemsCommand(this, Collections.singletonList(item));
-                    ChangeManager.getInstance().putCommand(addCommand);
+                    changeManager.putCommand(addCommand);
                     addCommand.execute();
                     success = true;
                 }
@@ -304,7 +320,7 @@ public class Diagram extends Pane {
 
             if (!selectedItems.isEmpty() || !deselectedItems.isEmpty()) {
                 selectionCommand = new SelectionChangeCommand(this, selectedItems, deselectedItems);
-                ChangeManager.getInstance().putCommand(selectionCommand);
+                changeManager.putCommand(selectionCommand);
                 selectionCommand.execute();
             }
 
@@ -365,7 +381,7 @@ public class Diagram extends Pane {
             }
 
             // We are registering the command without running it because the relocation is already done at this point
-            ChangeManager.getInstance().putCommand(new RelocateItemsCommand(itemDeltas));
+            changeManager.putCommand(new RelocateItemsCommand(itemDeltas));
 
             itemStateMap.clear();
             event.consume();
@@ -377,7 +393,7 @@ public class Diagram extends Pane {
         });
         item.addEventHandler(VisualMouseEvent.RESIZE_FINISHED, event -> {
             // We are registering the command without running it because the resizing is already done at this point
-            ChangeManager.getInstance().putCommand(new ResizeItemCommand(item, originalResizeState,
+            changeManager.putCommand(new ResizeItemCommand(item, originalResizeState,
                     new ResizeItemCommand.ResizeState(item.getTranslateX(), item.getTranslateY(),
                             item.getWidth(), item.getHeight())));
             event.consume();
@@ -419,7 +435,7 @@ public class Diagram extends Pane {
             isDragCopying = false;
 
             // We are just registering the command here, not executing it because items are already copied at this point
-            ChangeManager.getInstance().putCommand(new AddItemsCommand(this, dragCopyItems));
+            changeManager.putCommand(new AddItemsCommand(this, dragCopyItems));
 
             dragCopyItems.forEach(this::installItemEventHandlers);
             dragCopyItems.clear();
@@ -464,7 +480,7 @@ public class Diagram extends Pane {
         });
     }
 
-    private static void resetContextMenu() {
+    private void resetContextMenu() {
         contextMenu.hide();
         contextMenu.getItems().clear();
     }
@@ -557,7 +573,7 @@ public class Diagram extends Pane {
                     }
                     Command selectionCommand = new SelectionChangeCommand(this, selectedItems, deselectedItems);
                     selectionCommand.execute();
-                    ChangeManager.getInstance().putCommand(selectionCommand);
+                    changeManager.putCommand(selectionCommand);
 
                     getChildren().remove(rubberBandRect);
                     rubberBandRect = null;

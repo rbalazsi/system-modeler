@@ -15,10 +15,8 @@
 <?import com.robertbalazsi.systemmodeler.palette.PaletteView?>
 <?import com.robertbalazsi.systemmodeler.diagram.Diagram?>
 <?import javafx.scene.control.SeparatorMenuItem?>
-<?import javafx.scene.input.KeyCodeCombination?>
-<BorderPane fx:id="mainPane" prefWidth="1024.0" prefHeight="768.0" xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.robertbalazsi.systemmodeler.MainController">
-
-
+<BorderPane fx:id="mainPane" prefWidth="1024.0" prefHeight="768.0" xmlns="http://javafx.com/javafx/8.0.71"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.robertbalazsi.systemmodeler.app.MainController">
     <top>
         <VBox BorderPane.alignment="CENTER">
             <children>

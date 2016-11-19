@@ -1,4 +1,4 @@
-package com.robertbalazsi.systemmodeler;
+package com.robertbalazsi.systemmodeler.app;
 
 import com.robertbalazsi.systemmodeler.diagram.*;
 import javafx.application.Application;
