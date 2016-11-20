@@ -18,36 +18,38 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 @SpringBootApplication
 public class SystemModelerApp extends Application {
 
-    private ConfigurableApplicationContext appContext;
-    private Parent rootNode;
+    private static  String[] args;
+
+    ApplicationContext context;
 
     public static void main(String[] args) throws Exception {
+        SystemModelerApp.args = args;
+
         launch(args);
     }
 
     @Override
-    public void init() throws Exception {
-        appContext = SpringApplication.run(SystemModelerApp.class);
+    public void start(Stage stage) throws Exception {
+        context = SpringApplication.run(SystemModelerApp.class, args);
 
-        String fxmlFile = "/fxml/mainPanel.fxml";
+        /*String fxmlFile = "/fxml/mainPanel.fxml";
         FXMLLoader loader = new FXMLLoader();
         loader.setControllerFactory(appContext::getBean);
         rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
-    }
 
-    @Override
-    public void start(Stage stage) throws Exception {
         stage.setTitle("System Modeler");
         Scene scene = new Scene(rootNode, 1024, 768);
         scene.getStylesheets().add("/styles/main.css");
         stage.setScene(scene);
-        stage.setMaximized(false);
+        stage.setMaximized(false);*/
 
+        MainController mainController = context.getBean(MainController.class);
+
+        // Create a Scene
+        Scene scene = new Scene((Parent) mainController.getMainPane());
+        scene.getStylesheets().add("/styles/main.css");
+
+        stage.setScene(scene);
         stage.show();
-    }
-
-    @Override
-    public void stop() throws Exception {
-        appContext.close();
     }
 }

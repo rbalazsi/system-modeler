@@ -8,7 +8,10 @@ import com.robertbalazsi.systemmodeler.global.PaletteItemRegistry;
 import com.robertbalazsi.systemmodeler.palette.PaletteView;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
+import lombok.Getter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -19,11 +22,14 @@ import java.util.ResourceBundle;
 /**
  * Controller for mainPanel.fxml.
  */
-@Component
-public class MainController implements Initializable {
+public class MainController implements InitializingBean {
 
     @Resource
     private ChangeManager changeManager;
+
+    @FXML
+    @Getter
+    private Node mainPane;
 
     @FXML
     private PaletteView paletteView;
@@ -38,7 +44,7 @@ public class MainController implements Initializable {
     @FXML public MenuItem deleteMenuItem;
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void afterPropertiesSet() throws Exception {
         //TODO: load real items
         fillPaletteWithDummyItems(paletteView);
 

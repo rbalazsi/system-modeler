@@ -34,6 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import lombok.Getter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
  * The diagram containing the objects of the system.
  */
 @Component
-public class Diagram extends Pane implements Initializable {
+public class Diagram extends Pane implements InitializingBean {
 
     @Resource
     private ChangeManager changeManager;
@@ -103,7 +104,7 @@ public class Diagram extends Pane implements Initializable {
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void afterPropertiesSet() throws Exception {
         itemTextEditor = new TextField();
         contextMenu = new ContextMenu();
 
