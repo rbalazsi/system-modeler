@@ -47,15 +47,15 @@
 ***** RELEASE CUT 1. *****
 
 
-7. Aligning items
+8. Aligning items
  - H/V align items relative to each other (first selected, last selected, get ideas from MS Visio)
  - H/V align items relative to a custom ruler
 
-8. Item hierarchies
+9. Item hierarchies
  - Composite pattern for hierarchy
  - Project structure view populated with the hierarchy
 
-9. Project Structure View - basic functions
+10. Project Structure View - basic functions
  - clicking on an item will navigate to that sub-diagram
  - deleting an item will ask for confirmation to delete the whole sub-diagram
  - context menu with: delete

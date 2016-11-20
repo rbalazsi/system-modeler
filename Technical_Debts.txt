@@ -1,0 +1,8 @@
+1. Integrate Spring, inject global components
+ - inject: VisualItemRegistry, ChangeManager
+ - remove the singleton pattern implementations from them
+
+2. Extract event handler code outside Diagram
+ - maintain a global DiagramStateManager, which includes items' positions and flags like isDragAndDrop
+ - delegate handling to dedicated components (SelectHandler, DragAndDropHandler, MoveHandler, ResizeHandler)
+ - define interfaces like Selectable, Movable, Resizable, Dragable, etc. make Visuals implement them
