@@ -1,13 +1,10 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
-import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
-import com.robertbalazsi.systemmodeler.controlpoint.Location;
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrame;
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrameFactory;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * A rectangle on a diagram. 
@@ -20,19 +17,8 @@ public class Rectangle extends Visual {
     }
 
     @Override
-    public Collection<? extends ControlPoint> setupControlPoints() {
-        return Arrays.asList(
-                new ControlPoint.Builder(this, Location.TOP_LEFT).build(),
-                new ControlPoint.Builder(this, Location.TOP_CENTER).build(),
-                new ControlPoint.Builder(this, Location.TOP_RIGHT).build(),
-
-                new ControlPoint.Builder(this, Location.MIDDLE_LEFT).build(),
-                new ControlPoint.Builder(this, Location.MIDDLE_RIGHT).build(),
-
-                new ControlPoint.Builder(this, Location.BOTTOM_LEFT).build(),
-                new ControlPoint.Builder(this, Location.BOTTOM_CENTER).build(),
-                new ControlPoint.Builder(this, Location.BOTTOM_RIGHT).build()
-        );
+    public ControlFrame setupControlFrame() {
+        return ControlFrameFactory.eightDirectionalRectangle(this);
     }
 
     @Override

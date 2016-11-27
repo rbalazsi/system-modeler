@@ -1,15 +1,12 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
-import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
-import com.robertbalazsi.systemmodeler.controlpoint.Location;
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrame;
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrameFactory;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * A circle on a diagram.
@@ -34,18 +31,12 @@ public class Circle extends Visual {
         super(diameter, diameter);
         setDiameter(diameter);
         draw();
-        this.diameter.addListener(listener -> {redraw();});
+        this.diameter.addListener(listener -> redraw());
     }
 
     @Override
-    protected Collection<? extends ControlPoint> setupControlPoints() {
-        return Arrays.asList(
-                new ControlPoint.Builder(this, Location.TOP_LEFT).moveConstrained().build(),
-                new ControlPoint.Builder(this, Location.TOP_RIGHT).moveConstrained().build(),
-
-                new ControlPoint.Builder(this, Location.BOTTOM_LEFT).moveConstrained().build(),
-                new ControlPoint.Builder(this, Location.BOTTOM_RIGHT).moveConstrained().build()
-        );
+    protected ControlFrame setupControlFrame() {
+        return ControlFrameFactory.fourDirectionalSquare(this);
     }
 
     @Override

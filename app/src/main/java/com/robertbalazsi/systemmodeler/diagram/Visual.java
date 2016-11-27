@@ -1,6 +1,7 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
 import com.google.common.collect.Lists;
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrame;
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
 import javafx.beans.property.*;
 import javafx.geometry.Bounds;
@@ -18,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -196,11 +196,11 @@ public abstract class Visual extends Canvas {
         super(width, height);
 
         if (isResizable()) {
-            controlPoints.addAll(setupControlPoints());
+            controlPoints.addAll(setupControlFrame().getControlPoints());
         }
         resizable.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                controlPoints.addAll(setupControlPoints());
+                controlPoints.addAll(setupControlFrame().getControlPoints());
             } else {
                 controlPoints.clear();
             }
@@ -371,7 +371,7 @@ public abstract class Visual extends Canvas {
         });
     }
 
-    protected abstract Collection<? extends ControlPoint> setupControlPoints();
+    protected abstract ControlFrame setupControlFrame();
 
     public abstract Visual copy();
 

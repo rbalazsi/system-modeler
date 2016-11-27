@@ -1,0 +1,25 @@
+System Modeler - control points: Specification
+
+1. Definition
+A control point is a small rectangle associated with a parent Visual that modifies its parent's bounding box in some way.
+It is used for moving and resizing Visuals.
+
+
+2. Movement constrained
+Its movement can be constrained, which either means that it can be moved only in one axis, or it means that moving it one
+axis would automatically move it with the same amount in the other axis, depending on the direction.
+
+3. Types
+Control points can have predefined locations:
+ - Top Left
+ - Top Center
+ - Top Right
+ - Middle Left
+ - Middle Right
+ - Bottom Left
+ - Bottom Center
+ - Bottom Right
+
+4. Groups
+Two or more control points can form a group that defines together the bounding rectangle of their parent Visual. Moving
+one point would recalculate the box accordingly.

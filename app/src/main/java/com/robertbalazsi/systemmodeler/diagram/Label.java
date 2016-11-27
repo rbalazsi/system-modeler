@@ -1,9 +1,7 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
-import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
-
-import java.util.Collection;
-import java.util.Collections;
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrame;
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrameFactory;
 
 /**
  * A label on a diagram.
@@ -16,8 +14,8 @@ public class Label extends Visual {
     }
 
     @Override
-    protected Collection<? extends ControlPoint> setupControlPoints() {
-        return Collections.EMPTY_LIST;
+    protected ControlFrame setupControlFrame() {
+        return ControlFrameFactory.emptyFrame(this);
     }
 
     @Override

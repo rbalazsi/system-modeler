@@ -1,5 +1,6 @@
 package com.robertbalazsi.systemmodeler.diagram;
 
+import com.robertbalazsi.systemmodeler.controlpoint.ControlFrame;
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
 
 import java.util.Collection;
@@ -9,18 +10,21 @@ import java.util.Collection;
  */
 public class Line extends Visual {
 
-    public Line(double width, double height) {
-        super(width, height);
+    //TODO: revise properties, hide width and height
+    public Line(double length, double width) {
+        super(length, width);
     }
 
     @Override
-    protected Collection<? extends ControlPoint> setupControlPoints() {
+    protected ControlFrame setupControlFrame() {
         return null;
     }
 
     @Override
     public Visual copy() {
-        return null;
+        Line line= new Line(getWidth(), getHeight());
+        baseCopy(this, line);
+        return line;
     }
 
     @Override

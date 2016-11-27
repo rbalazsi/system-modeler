@@ -258,14 +258,11 @@ public class Diagram extends Pane {
     }
 
     private void setupDragDropHandlers() {
-        this.setOnDragOver(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-                if (event.getGestureSource() != this) {
-                    event.acceptTransferModes(TransferMode.COPY);
-                }
-                event.consume();
+        this.setOnDragOver(event -> {
+            if (event.getGestureSource() != this) {
+                event.acceptTransferModes(TransferMode.COPY);
             }
+            event.consume();
         });
 
         this.setOnDragDropped(event -> {
