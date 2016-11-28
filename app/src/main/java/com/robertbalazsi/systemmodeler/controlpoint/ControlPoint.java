@@ -2,7 +2,6 @@ package com.robertbalazsi.systemmodeler.controlpoint;
 
 import com.robertbalazsi.systemmodeler.diagram.Visual;
 import javafx.beans.property.*;
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -75,17 +74,15 @@ public abstract class ControlPoint {
     }
 
     protected Visual parent;
-    protected Location location;
     protected Bounds bounds;
 
     protected double initMouseX, initMouseY;
     protected double initTranslateX, initTranslateY;
     protected double initWidth, initHeight;
 
-    protected ControlPoint(Visual parent, Location location, boolean moveConstrained, double size, Color selectedColor,
+    protected ControlPoint(Visual parent, boolean moveConstrained, double size, Color selectedColor,
                            Color deselectedColor) {
         this.parent = parent;
-        this.location = location;
         setMoveConstrained(moveConstrained);
         if (size != 0) {
             setSize(size);
@@ -97,10 +94,6 @@ public abstract class ControlPoint {
             setSelectedColor(selectedColor);
         }
         refreshBounds();
-    }
-
-    public Location getLocation() {
-        return location;
     }
 
     public Bounds getBounds() {
@@ -145,26 +138,25 @@ public abstract class ControlPoint {
         gc.save();
     }
 
+    //TODO: !!!! REMOVE builder, make it duplicate code but make it only a convenience way to use; here have a constructor, and optional fields with setters
     /**
      * Builder class for {@link ControlPoint}.
      */
-    public static class Builder {
+    public static abstract class Builder<B extends Builder, E extends ControlPoint> {
 
-        private final Visual parent;
-        private final Location location;
-        private boolean moveConstrained;
-        private double size;
-        private Color deselectedColor;
-        private Color selectedColor;
+        protected final Visual parent;
+        protected boolean moveConstrained;
+        protected double size;
+        protected Color deselectedColor;
+        protected Color selectedColor;
 
-        public Builder(Visual parent, Location location) {
+        public Builder(Visual parent) {
             this.parent = parent;
-            this.location = location;
         }
 
-        public Builder size(double size) {
+        public B size(double size) {
             this.size = size;
-            return this;
+            return (B)this;
         }
 
         public Builder moveConstrained() {
@@ -182,226 +174,6 @@ public abstract class ControlPoint {
             return this;
         }
 
-        public ControlPoint build() {
-            return Factory.create(this);
-        }
-    }
-
-    /**
-     * Hidden factory class for deciding the {@link ControlPoint} implementation with respect to its location.
-     */
-    private static class Factory {
-        static ControlPoint create(Builder builder) {
-            switch (builder.location) {
-                case TOP_LEFT:
-                    return new TopLeft(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
-                case TOP_CENTER:
-                    return new TopCenter(builder.parent, builder.size, builder.selectedColor, builder.deselectedColor);
-                case TOP_RIGHT:
-                    return new TopRight(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
-                case MIDDLE_LEFT:
-                    return new MiddleLeft(builder.parent, builder.size, builder.selectedColor, builder.deselectedColor);
-                case MIDDLE_RIGHT:
-                    return new MiddleRight(builder.parent, builder.size, builder.selectedColor, builder.deselectedColor);
-                case BOTTOM_LEFT:
-                    return new BottomLeft(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
-                case BOTTOM_CENTER:
-                    return new BottomCenter(builder.parent, builder.size, builder.selectedColor, builder.deselectedColor);
-                case BOTTOM_RIGHT:
-                    return new BottomRight(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
-                default:
-                    return null;
-            }
-        }
-    }
-
-    /**
-     * Top left resizer control point.
-     */
-    private static class TopLeft extends ControlPoint {
-
-        TopLeft(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.TOP_LEFT, moveConstrained, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
-            parent.setWidth(initWidth + initMouseX - event.getSceneX());
-
-            if (!isMoveConstrained()) {
-                parent.setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
-                parent.setHeight(initHeight + initMouseY - event.getSceneY());
-            } else {
-                parent.setTranslateY(initTranslateX + event.getSceneX() - initMouseX);
-                parent.setHeight(initHeight + initMouseX - event.getSceneX());
-            }
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(0, 0, getSize(), getSize());
-        }
-    }
-
-    /**
-     * Top center resizer control point.
-     */
-    private static class TopCenter extends ControlPoint {
-
-        TopCenter(Visual parent, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.TOP_CENTER, true, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
-            parent.setHeight(initHeight + initMouseY - event.getSceneY());
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth() / 2 - getSize() /2, 0, getSize(), getSize());
-        }
-    }
-
-    /**
-     * Top right resizer control point.
-     */
-    private static class TopRight extends ControlPoint {
-
-        TopRight(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.TOP_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setWidth(initWidth + event.getSceneX() - initMouseX);
-
-            if (!isMoveConstrained()) {
-                parent.setTranslateY(initTranslateY + event.getSceneY() - initMouseY);
-                parent.setHeight(initHeight + initMouseY - event.getSceneY());
-            } else {
-                parent.setTranslateY(initTranslateY + initMouseX - event.getSceneX());
-                parent.setHeight(initHeight + event.getSceneX() - initMouseX);
-            }
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth()- getSize(), 0, getSize(), getSize());
-        }
-    }
-
-    /**
-     * Middle left resizer control point.
-     */
-    private static class MiddleLeft extends ControlPoint {
-
-        MiddleLeft(Visual parent, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.MIDDLE_LEFT, true, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
-            parent.setWidth(initWidth + initMouseX - event.getSceneX());
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(1, parent.getHeight() / 2 - getSize() /2, getSize(), getSize());
-        }
-    }
-
-    /**
-     * Middle right resizer control point.
-     */
-    private static class MiddleRight extends ControlPoint {
-
-        MiddleRight(Visual parent, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.MIDDLE_RIGHT, true, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setWidth(initWidth + event.getSceneX() - initMouseX);
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth()- getSize(), parent.getHeight() / 2 - getSize() /2, getSize(), getSize());
-        }
-    }
-
-    /**
-     * Bottom left resizer control point.
-     */
-    private static class BottomLeft extends ControlPoint {
-
-        BottomLeft(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.BOTTOM_LEFT, moveConstrained, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setTranslateX(initTranslateX + event.getSceneX() - initMouseX);
-            parent.setWidth(initWidth + initMouseX - event.getSceneX());
-            if (!isMoveConstrained()) {
-                parent.setHeight(initHeight + event.getSceneY() - initMouseY);
-            } else {
-                parent.setHeight(initHeight + initMouseX - event.getSceneX());
-            }
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(0, parent.getHeight() - getSize(), getSize(), getSize());
-        }
-    }
-
-    /**
-     * Bottom center resizer control point.
-     */
-    private static class BottomCenter extends ControlPoint {
-
-        BottomCenter(Visual parent, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.BOTTOM_CENTER, true, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setHeight(initHeight + event.getSceneY() - initMouseY);
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth() / 2 - getSize() /2, parent.getHeight() - getSize(), getSize(), getSize());
-        }
-    }
-
-    /**
-     * Bottom right resizer control point.
-     */
-    private static class BottomRight extends ControlPoint {
-
-        BottomRight(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
-            super(parent, Location.BOTTOM_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
-        }
-
-        @Override
-        public void receiveMouseDragged(MouseEvent event) {
-            parent.setWidth(initWidth + event.getSceneX() - initMouseX);
-            if (!isMoveConstrained()) {
-                parent.setHeight(initHeight + event.getSceneY() - initMouseY);
-            } else {
-                parent.setHeight(initHeight + event.getSceneX() - initMouseX);
-            }
-        }
-
-        @Override
-        public Bounds calculateBounds() {
-            return new BoundingBox(parent.getWidth()- getSize(), parent.getHeight() - getSize(), getSize(), getSize());
-        }
+        public abstract T build();
     }
 }

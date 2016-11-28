@@ -3,7 +3,7 @@ package com.robertbalazsi.systemmodeler.controlpoint;
 /**
  * Created by robi on 8/1/16.
  */
-public enum Location {
+public enum Position {
     TOP_LEFT,
     TOP_CENTER,
     TOP_RIGHT,

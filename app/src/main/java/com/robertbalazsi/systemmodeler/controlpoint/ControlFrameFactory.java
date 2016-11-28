@@ -23,4 +23,8 @@ public class ControlFrameFactory {
     public static ControlFrame eightDirectionalRectangle(Visual parent) {
         return new ControlFrame.EightDirectionalRectangle(parent);
     }
+
+    public static ControlFrame polygonalFrame(Visual parent, ControlPointGroup controlPointGroup) {
+
+    }
 }

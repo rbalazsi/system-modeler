@@ -1,7 +1,7 @@
 package com.robertbalazsi.systemmodeler.vector;
 
 import com.robertbalazsi.systemmodeler.controlpoint.ControlPoint;
-import com.robertbalazsi.systemmodeler.controlpoint.Location;
+import com.robertbalazsi.systemmodeler.controlpoint.Position;
 import com.robertbalazsi.systemmodeler.diagram.Visual;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
@@ -22,7 +22,7 @@ public class CustomControlPoint extends ControlPoint {
     private double deltaY;
 
     CustomControlPoint(Visual parent, boolean moveConstrained, double positionX, double positionY, double size, Color selectedColor, Color deselectedColor) {
-        super(parent, Location.BOTTOM_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
+        super(parent, Position.BOTTOM_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
         this.positionX = positionX;
         this.positionY = positionY;
     }
