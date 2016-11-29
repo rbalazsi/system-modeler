@@ -2,6 +2,7 @@ package com.robertbalazsi.systemmodeler.controlpoint;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,9 +12,19 @@ public class ControlPointGroup {
 
     @Getter
     //TODO: return immutable list?
-    private final List<GroupedControlPoint> members;
+    private List<GroupedControlPoint> members;
 
-    public ControlPointGroup(List<GroupedControlPoint> members) {
-        this.members = members;
+    public ControlPointGroup() {
+        members = new ArrayList<>();
+    }
+
+    public ControlPointGroup(List<GroupedControlPoint> points) {
+        points.forEach(point -> point.setGroup(this));
+        this.members = points;
+    }
+
+    public void add(GroupedControlPoint point) {
+        point.setGroup(this);
+        members.add(point);
     }
 }

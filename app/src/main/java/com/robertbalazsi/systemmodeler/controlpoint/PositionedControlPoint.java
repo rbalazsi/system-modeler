@@ -11,12 +11,12 @@ import lombok.Getter;
  * A control point placed in a predefined position in the parent.
  * //TODO: document on positions, etc.
  */
-public class PositionalControlPoint extends ControlPoint {
+public class PositionedControlPoint extends ControlPoint {
 
     @Getter
     protected Position position;
 
-    protected PositionalControlPoint(Visual parent, Position position, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
+    protected PositionedControlPoint(Visual parent, Position position, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
         super(parent, moveConstrained, size, selectedColor, deselectedColor);
         this.position = position;
     }
@@ -31,7 +31,7 @@ public class PositionalControlPoint extends ControlPoint {
         return null;
     }
 
-    public static class Builder extends ControlPoint.Builder<PositionalControlPoint> {
+    public static class Builder extends ControlPoint.Builder<Builder, PositionedControlPoint> {
 
         protected Position position;
 
@@ -41,7 +41,12 @@ public class PositionalControlPoint extends ControlPoint {
         }
 
         @Override
-        public PositionalControlPoint build() {
+        protected Builder getThis() {
+            return this;
+        }
+
+        @Override
+        public PositionedControlPoint build() {
             return Factory.create(this);
         }
     }
@@ -50,7 +55,7 @@ public class PositionalControlPoint extends ControlPoint {
      * Hidden factory class for deciding the {@link ControlPoint} implementation with respect to its position.
      */
     private static class Factory {
-        static PositionalControlPoint create(Builder builder) {
+        static PositionedControlPoint create(Builder builder) {
             switch (builder.position) {
                 case TOP_LEFT:
                     return new TopLeft(builder.parent, builder.moveConstrained, builder.size, builder.selectedColor, builder.deselectedColor);
@@ -77,7 +82,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Top left resizer control point.
      */
-    private static class TopLeft extends PositionalControlPoint {
+    private static class TopLeft extends PositionedControlPoint {
 
         TopLeft(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.TOP_LEFT, moveConstrained, size, selectedColor, deselectedColor);
@@ -106,7 +111,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Top center resizer control point.
      */
-    private static class TopCenter extends PositionalControlPoint {
+    private static class TopCenter extends PositionedControlPoint {
 
         TopCenter(Visual parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.TOP_CENTER, true, size, selectedColor, deselectedColor);
@@ -127,7 +132,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Top right resizer control point.
      */
-    private static class TopRight extends PositionalControlPoint {
+    private static class TopRight extends PositionedControlPoint {
 
         TopRight(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.TOP_RIGHT, moveConstrained, size, selectedColor, deselectedColor);
@@ -155,7 +160,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Middle left resizer control point.
      */
-    private static class MiddleLeft extends PositionalControlPoint {
+    private static class MiddleLeft extends PositionedControlPoint {
 
         MiddleLeft(Visual parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.MIDDLE_LEFT, true, size, selectedColor, deselectedColor);
@@ -176,7 +181,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Middle right resizer control point.
      */
-    private static class MiddleRight extends PositionalControlPoint {
+    private static class MiddleRight extends PositionedControlPoint {
 
         MiddleRight(Visual parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.MIDDLE_RIGHT, true, size, selectedColor, deselectedColor);
@@ -196,7 +201,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Bottom left resizer control point.
      */
-    private static class BottomLeft extends PositionalControlPoint {
+    private static class BottomLeft extends PositionedControlPoint {
 
         BottomLeft(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.BOTTOM_LEFT, moveConstrained, size, selectedColor, deselectedColor);
@@ -222,7 +227,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Bottom center resizer control point.
      */
-    private static class BottomCenter extends PositionalControlPoint {
+    private static class BottomCenter extends PositionedControlPoint {
 
         BottomCenter(Visual parent, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.BOTTOM_CENTER, true, size, selectedColor, deselectedColor);
@@ -242,7 +247,7 @@ public class PositionalControlPoint extends ControlPoint {
     /**
      * Bottom right resizer control point.
      */
-    private static class BottomRight extends PositionalControlPoint {
+    private static class BottomRight extends PositionedControlPoint {
 
         BottomRight(Visual parent, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
             super(parent, Position.BOTTOM_RIGHT, moveConstrained, size, selectedColor, deselectedColor);

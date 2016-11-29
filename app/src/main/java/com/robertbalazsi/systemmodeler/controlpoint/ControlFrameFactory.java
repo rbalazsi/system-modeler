@@ -25,6 +25,6 @@ public class ControlFrameFactory {
     }
 
     public static ControlFrame polygonalFrame(Visual parent, ControlPointGroup controlPointGroup) {
-
+        return new ControlFrame.PolygonalFrame(parent, controlPointGroup);
     }
 }

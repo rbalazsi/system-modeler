@@ -138,13 +138,14 @@ public abstract class ControlPoint {
         gc.save();
     }
 
-    //TODO: !!!! REMOVE builder, make it duplicate code but make it only a convenience way to use; here have a constructor, and optional fields with setters
     /**
-     * Builder class for {@link ControlPoint}.
+     * Base builder class for {@link ControlPoint}.
      */
     public static abstract class Builder<B extends Builder, E extends ControlPoint> {
 
         protected final Visual parent;
+
+        //TODO: !! provide means to define flexible constraints (X axis, Y axis, diagonal - same ammount in both directions, other?)
         protected boolean moveConstrained;
         protected double size;
         protected Color deselectedColor;
@@ -156,24 +157,26 @@ public abstract class ControlPoint {
 
         public B size(double size) {
             this.size = size;
-            return (B)this;
+            return getThis();
         }
 
-        public Builder moveConstrained() {
+        public B moveConstrained() {
             this.moveConstrained = true;
-            return this;
+            return getThis();
         }
 
-        public Builder deselectedColor(Color color) {
+        public B deselectedColor(Color color) {
             this.deselectedColor = color;
-            return this;
+            return getThis();
         }
 
-        public Builder selectedColor(Color color) {
+        public B selectedColor(Color color) {
             this.selectedColor = color;
-            return this;
+            return getThis();
         }
 
-        public abstract T build();
+        abstract B getThis();
+
+        public abstract E build();
     }
 }

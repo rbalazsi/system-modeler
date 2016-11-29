@@ -1,7 +1,7 @@
 package com.robertbalazsi.systemmodeler.controlpoint;
 
 /**
- * Created by robi on 8/1/16.
+ * TODO: document
  */
 public enum Position {
     TOP_LEFT,
