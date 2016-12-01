@@ -51,7 +51,8 @@ public class PaletteView extends TitledPane {
             TreeItem<PaletteItem> categoryTree = new TreeItem<>(new PaletteItem(category.getName(), PaletteItem.ItemType.CATEGORY));
             categoryTree.setExpanded(true);
             categoryTree.getChildren().addAll(category.getItems().stream()
-                    .map(s -> new TreeItem<>(new PaletteItem(s, PaletteItem.ItemType.ITEM))).collect(Collectors.toList()));
+                    .map(s -> new TreeItem<>(new PaletteItem(s, PaletteItem.ItemType.ITEM)))
+                    .collect(Collectors.toList()));
             rootItem.getChildren().add(categoryTree);
         }
         TreeView<PaletteItem> itemsList = new TreeView<>(rootItem);

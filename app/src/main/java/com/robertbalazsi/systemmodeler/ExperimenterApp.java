@@ -49,22 +49,24 @@ public class ExperimenterApp extends Application {
         propertyPage.setContent(setupPropertyPageContents());
 
         //TODO: Add children
-        Visual rectangle = new Rectangle(200, 100);
+        /*Visual rectangle = new Rectangle(200, 100);
         rectangle.setText("Rectangle");
         rectangle.setFont(new Font(30));
         rectangle.relocate(50, 100);
         Visual circle = new Circle(200);
         circle.setText("Circle");
         circle.relocate(350, 100);
-//        DiagramItem ellipse = new Ellipse(200, 100);
-//        ellipse.setText("Ellipse");
-//        ellipse.relocate(400, 100);
-//        DiagramItem triangle = new Triangle(200, 150);
-//        triangle.setText("Triangle");
-//        triangle.relocate(50, 300);
-//        DiagramItem label = new com.robertbalazsi.systemmodeler.diagram.Label(150, 80);
-//        label.setText("Label");
-//        label.relocate(50, 450);
+        Visual ellipse = new Ellipse(200, 100);
+        ellipse.setText("Ellipse");
+        ellipse.relocate(400, 100);
+        Visual triangle = new Triangle(200, 150);
+        triangle.setText("Triangle");
+        triangle.relocate(50, 300);
+        Visual label = new com.robertbalazsi.systemmodeler.diagram.Label(150, 80);
+        label.setText("Label");
+        label.relocate(50, 450);*/
+        Visual line = new Line(100, 5);
+        line.relocate(350, 200);
 
         Scene scene = new Scene(rootPane, 900, 600);
 
@@ -72,11 +74,12 @@ public class ExperimenterApp extends Application {
         stage.setScene(scene);
         stage.setMaximized(false);
 
-        diagram.addItem(rectangle);
+        /*diagram.addItem(rectangle);
         diagram.addItem(circle);
-//        diagram.addItem(ellipse);
-//        diagram.addItem(triangle);
-//        diagram.addItem(label);
+        diagram.addItem(ellipse);
+        diagram.addItem(triangle);
+        diagram.addItem(label);*/
+        diagram.addItem(line);
 
         stage.show();
     }

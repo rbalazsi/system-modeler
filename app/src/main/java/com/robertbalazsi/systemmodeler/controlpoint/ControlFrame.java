@@ -25,8 +25,12 @@ public abstract class ControlFrame {
         this.controlPoints = controlPoints;
     }
 
+    /**
+     * An empty control frame used for non-resizable visuals.
+     */
     static class Empty extends ControlFrame {
-        public Empty(Visual parent) {
+
+        Empty(Visual parent) {
             super(parent, Collections.emptyList());
         }
     }
@@ -74,7 +78,7 @@ public abstract class ControlFrame {
      */
     static class PolygonalFrame extends ControlFrame {
 
-        public PolygonalFrame(Visual parent, ControlPointGroup controlPointGroup) {
+        PolygonalFrame(Visual parent, ControlPointGroup controlPointGroup) {
             super(parent, controlPointGroup.getMembers().stream().collect(Collectors.toList()));
         }
     }

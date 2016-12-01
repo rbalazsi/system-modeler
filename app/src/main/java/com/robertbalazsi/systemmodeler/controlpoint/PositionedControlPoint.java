@@ -11,7 +11,7 @@ import lombok.Getter;
  * A control point placed in a predefined position in the parent.
  * //TODO: document on positions, etc.
  */
-public class PositionedControlPoint extends ControlPoint {
+public abstract class PositionedControlPoint extends ControlPoint {
 
     @Getter
     protected Position position;
@@ -19,16 +19,6 @@ public class PositionedControlPoint extends ControlPoint {
     protected PositionedControlPoint(Visual parent, Position position, boolean moveConstrained, double size, Color selectedColor, Color deselectedColor) {
         super(parent, moveConstrained, size, selectedColor, deselectedColor);
         this.position = position;
-    }
-
-    @Override
-    public void receiveMouseDragged(MouseEvent event) {
-
-    }
-
-    @Override
-    public Bounds calculateBounds() {
-        return null;
     }
 
     public static class Builder extends ControlPoint.Builder<Builder, PositionedControlPoint> {

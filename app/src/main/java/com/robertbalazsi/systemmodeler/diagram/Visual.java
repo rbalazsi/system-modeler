@@ -36,7 +36,7 @@ public abstract class Visual extends Canvas {
     private boolean isResizing = false;
     private boolean isDragCopying = false;
     private double initMouseX, initMouseY;
-    private List<ControlPoint> controlPoints = Lists.newArrayList();
+    protected List<ControlPoint> controlPoints = Lists.newArrayList();
     private ControlPoint selectedControlPoint;
 
     private BooleanProperty resizable = new SimpleBooleanProperty(this, "resizable", true);

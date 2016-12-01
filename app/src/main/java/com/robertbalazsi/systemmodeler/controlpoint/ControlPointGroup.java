@@ -19,8 +19,8 @@ public class ControlPointGroup {
     }
 
     public ControlPointGroup(List<GroupedControlPoint> points) {
-        points.forEach(point -> point.setGroup(this));
         this.members = points;
+        points.forEach(point -> point.setGroup(this));
     }
 
     public void add(GroupedControlPoint point) {

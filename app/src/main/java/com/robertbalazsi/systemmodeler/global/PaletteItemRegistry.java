@@ -12,6 +12,7 @@ public class PaletteItemRegistry {
     public static final String ELLIPSE = "Ellipse";
     public static final String ROUNDED_RECTANGLE = "Rounded rectangle";
     public static final String TRIANGLE = "Triangle";
+    public static final String LINE = "Line";
     public static final String LABEL = "Label";
 
     public static Visual getItem(String name) {
@@ -26,6 +27,8 @@ public class PaletteItemRegistry {
             return new RoundedRectangle(200, 100, 15, 15);
         } else if (TRIANGLE.equals(name)) {
             return new Triangle(200, 100);
+        } else if (LINE.equals(name)) {
+            return new Line(100, 5);
         } else if (LABEL.equals(name)) {
             Label label = new Label(150, 80);
             label.setText("Label");

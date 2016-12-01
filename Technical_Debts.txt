@@ -2,7 +2,10 @@
  - inject: VisualItemRegistry, ChangeManager
  - remove the singleton pattern implementations from them
 
-2. Extract event handler code outside Diagram
+2. Revise the Visual API
+ - width and height may not apply to all visuals (e.g. Line)
+
+3. Extract event handler code outside Diagram
  - maintain a global DiagramStateManager, which includes items' positions and flags like isDragAndDrop
  - delegate handling to dedicated components (SelectHandler, DragAndDropHandler, MoveHandler, ResizeHandler)
  - define interfaces like Selectable, Movable, Resizable, Dragable, etc. make Visuals implement them
